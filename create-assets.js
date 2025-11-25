@@ -30,3 +30,6 @@ You can:
 fs.writeFileSync(path.join(assetsDir, 'README.txt'), note);
 console.log('Assets directory created. See assets/README.txt for instructions.');
 
+
+
+

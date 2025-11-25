@@ -11,6 +11,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Card } from '../components/Card';
 import { useAppStore } from '../store/useAppStore';
+import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { RouteProp } from '@react-navigation/native';
 
@@ -102,7 +103,7 @@ export const HousePlanDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   content: {
     padding: 16,
@@ -113,17 +114,17 @@ const styles = StyleSheet.create({
   address: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   applicationId: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   info: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
   },
   floorCard: {
     marginBottom: 16,
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
   floorTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   roomItem: {
@@ -144,11 +145,11 @@ const styles = StyleSheet.create({
   },
   roomName: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: colors.textPrimary,
   },
   roomArea: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
   },
   linkContainer: {
     marginTop: 8,

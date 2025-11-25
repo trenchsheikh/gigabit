@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { CustomAgent, ChatMessage, HousePlan, WifiHeatmapData, UserSettings } from '../types';
+import type { CustomAgent, ChatMessage, HousePlan, WifiHeatmapData, UserSettings, HomeDevice } from '../types';
+import type { PostcodeData } from './postcode';
 
 const STORAGE_KEYS = {
   AGENTS: 'agents',
@@ -7,6 +8,9 @@ const STORAGE_KEYS = {
   HOUSE_PLANS: 'house_plans',
   WIFI_HEATMAP: 'wifi_heatmap',
   USER_SETTINGS: 'user_settings',
+  AUTH_DATA: 'auth_data',
+  POSTCODE_DATA: 'postcode_data',
+  DEVICES: 'devices',
 } as const;
 
 export const storageService = {
@@ -84,6 +88,12 @@ export const storageService = {
     await AsyncStorage.setItem(STORAGE_KEYS.HOUSE_PLANS, JSON.stringify(plans));
   },
 
+  async deleteHousePlan(applicationId: string): Promise<void> {
+    const plans = await this.getHousePlans();
+    const filtered = plans.filter((p) => p.applicationId !== applicationId);
+    await AsyncStorage.setItem(STORAGE_KEYS.HOUSE_PLANS, JSON.stringify(filtered));
+  },
+
   // WiFi Heatmap
   async getWifiHeatmap(): Promise<WifiHeatmapData | null> {
     try {
@@ -112,6 +122,71 @@ export const storageService = {
 
   async saveUserSettings(settings: UserSettings): Promise<void> {
     await AsyncStorage.setItem(STORAGE_KEYS.USER_SETTINGS, JSON.stringify(settings));
+  },
+
+  // Auth Data
+  async getAuthData(): Promise<{ username: string; isAuthenticated: boolean } | null> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.AUTH_DATA);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Error loading auth data:', error);
+      return null;
+    }
+  },
+
+  async saveAuthData(authData: { username: string; isAuthenticated: boolean }): Promise<void> {
+    await AsyncStorage.setItem(STORAGE_KEYS.AUTH_DATA, JSON.stringify(authData));
+  },
+
+  async clearAuthData(): Promise<void> {
+    await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_DATA);
+  },
+
+  // Postcode Data
+  async getPostcodeData(): Promise<{ postcode: string; data: PostcodeData } | null> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.POSTCODE_DATA);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Error loading postcode data:', error);
+      return null;
+    }
+  },
+
+  async savePostcodeData(postcode: string, data: PostcodeData): Promise<void> {
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.POSTCODE_DATA,
+      JSON.stringify({ postcode, data })
+    );
+  },
+
+  // Devices
+  async getDevices(): Promise<HomeDevice[]> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.DEVICES);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error('Error loading devices:', error);
+      return [];
+    }
+  },
+
+  async saveDevice(device: HomeDevice): Promise<void> {
+    const devices = await this.getDevices();
+    const existingIndex = devices.findIndex((d) => d.id === device.id);
+    if (existingIndex >= 0) {
+      devices[existingIndex] = device;
+    } else {
+      devices.push(device);
+    }
+    await AsyncStorage.setItem(STORAGE_KEYS.DEVICES, JSON.stringify(devices));
+  },
+
+  async deleteDevice(deviceId: string): Promise<void> {
+    const devices = await this.getDevices();
+    const filtered = devices.filter((d) => d.id !== deviceId);
+    await AsyncStorage.setItem(STORAGE_KEYS.DEVICES, JSON.stringify(filtered));
   },
 };
 

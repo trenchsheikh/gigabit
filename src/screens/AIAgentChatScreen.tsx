@@ -14,6 +14,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppStore } from '../store/useAppStore';
+import { colors } from '../theme/colors';
 
 // Safe import of speech recognition - handle case where native module isn't available
 let SpeechRecognition: any = null;
@@ -571,7 +572,7 @@ export const AIAgentChatScreen: React.FC = () => {
             }, 100);
           }}
           placeholder={isListening ? "Listening..." : "Type your message..."}
-          placeholderTextColor="#666666"
+          placeholderTextColor={colors.textSecondary}
           multiline
           maxLength={1000}
           onFocus={() => {
@@ -609,7 +610,7 @@ export const AIAgentChatScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   messagesList: {
     padding: 16,
@@ -629,12 +630,12 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#2A2A2A',
+    backgroundColor: colors.cardBackground,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
     borderWidth: 2,
-    borderColor: '#3A3A3A',
+    borderColor: colors.border,
   },
   welcomeAvatarEmoji: {
     fontSize: 40,
@@ -642,14 +643,14 @@ const styles = StyleSheet.create({
   welcomeTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 12,
     letterSpacing: -0.5,
   },
   welcomeDescription: {
     fontSize: 16,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
@@ -657,21 +658,21 @@ const styles = StyleSheet.create({
   },
   suggestionsContainer: {
     width: '100%',
-    backgroundColor: '#2A2A2A',
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#3A3A3A',
+    borderColor: colors.border,
   },
   suggestionsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   suggestion: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     lineHeight: 22,
     marginBottom: 8,
   },
@@ -683,21 +684,21 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.accentBlue,
     borderBottomRightRadius: 4,
   },
   assistantMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#2A2A2A',
+    backgroundColor: colors.cardBackground,
     borderBottomLeftRadius: 4,
   },
   messageText: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     lineHeight: 22,
   },
   userMessageText: {
-    color: '#FFFFFF',
+    color: colors.textPrimary,
   },
   audioButton: {
     marginTop: 10,
@@ -720,7 +721,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: 16,
     paddingTop: 12,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: '#2A2A2A',
     gap: 8,
@@ -729,7 +730,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.accentBlue,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
@@ -743,24 +744,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   callButtonText: {
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     fontSize: 14,
     fontWeight: '600',
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#3A3A3A',
+    borderColor: colors.border,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 16,
     maxHeight: 100,
-    backgroundColor: '#2A2A2A',
-    color: '#FFFFFF',
+    backgroundColor: colors.cardBackground,
+    color: colors.textPrimary,
   },
   sendButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.accentBlue,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
@@ -772,7 +773,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   sendButtonText: {
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     fontWeight: '600',
   },
   loadingContainer: {
@@ -780,17 +781,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 12,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   loadingText: {
     marginLeft: 8,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     fontSize: 14,
   },
   errorText: {
     textAlign: 'center',
     marginTop: 40,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
   },
 });
 

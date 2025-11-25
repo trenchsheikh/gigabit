@@ -9,9 +9,11 @@ import {
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../components/Button';
+import { DeviceIdentificationModal } from '../components/DeviceIdentificationModal';
 import { useAppStore } from '../store/useAppStore';
-import type { WifiHeatmapPoint } from '../types';
+import type { WifiHeatmapPoint, HomeDevice } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
@@ -32,10 +34,11 @@ const SCAN_INTERVAL = 1000; // Scan every 1 second
 
 export const ARHeatmapScreen: React.FC = () => {
   const navigation = useNavigation<ARHeatmapNavigationProp>();
-  const { updateWifiHeatmap, wifiHeatmap, selectedHousePlan } = useAppStore();
+  const { updateWifiHeatmap, wifiHeatmap, selectedHousePlan, addDevice } = useAppStore();
   const [permission, requestPermission] = useCameraPermissions();
   const [points, setPoints] = useState<WifiHeatmapPoint[]>([]);
   const [recording, setRecording] = useState(false);
+  const [showDeviceModal, setShowDeviceModal] = useState(false);
   const cameraRef = useRef<any>(null);
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -160,6 +163,12 @@ export const ARHeatmapScreen: React.FC = () => {
         onPress: () => setPoints([]),
       },
     ]);
+  };
+
+  const handleSaveDevice = async (device: HomeDevice) => {
+    await addDevice(device);
+    Alert.alert('Success', `Device "${device.name}" has been added to your network.`);
+    // Devices list will auto-refresh via the modal's useEffect
   };
 
   const getStrengthColor = (strength: number): string => {
@@ -299,6 +308,14 @@ export const ARHeatmapScreen: React.FC = () => {
                 style={styles.controlButton}
               />
             )}
+            <TouchableOpacity
+              style={styles.identifyDeviceButton}
+              onPress={() => setShowDeviceModal(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="add-circle" size={20} color="#FFFFFF" />
+              <Text style={styles.identifyDeviceText}>Identify Device</Text>
+            </TouchableOpacity>
             {points.length > 0 && (
               <Button
                 title="Clear"
@@ -313,6 +330,13 @@ export const ARHeatmapScreen: React.FC = () => {
           </View>
         </View>
       </CameraView>
+
+      <DeviceIdentificationModal
+        visible={showDeviceModal}
+        onClose={() => setShowDeviceModal(false)}
+        onSave={handleSaveDevice}
+        selectedHousePlan={selectedHousePlan}
+      />
     </View>
   );
 };
@@ -397,6 +421,22 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     marginBottom: 8,
+  },
+  identifyDeviceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 8,
+  },
+  identifyDeviceText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   pointsCount: {
     color: '#FFFFFF',

@@ -14,6 +14,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
 import { mockHousePlan181392 } from '../data/mockHousePlans';
+import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
@@ -126,7 +127,7 @@ export const HousePlansScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   content: {
     padding: 16,
@@ -137,30 +138,30 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   description: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     marginBottom: 24,
     lineHeight: 20,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 8,
     marginTop: 16,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#3A3A3A',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#2A2A2A',
-    color: '#FFFFFF',
+    backgroundColor: colors.cardBackground,
+    color: colors.textPrimary,
   },
   submitButton: {
     marginTop: 24,
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 14,
-    color: '#4CAF50',
+    color: colors.accentBlue,
     textAlign: 'center',
   },
 });

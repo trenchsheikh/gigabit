@@ -28,11 +28,18 @@ export interface RoomZone {
   estimatedAreaM2?: number;
 }
 
+export interface ConstructionDetails {
+  externalWallMaterial: 'brick' | 'stone' | 'concrete' | 'timber_frame' | 'other';
+  internalWallMaterial: 'drywall' | 'solid_brick' | 'concrete' | 'other';
+  floorMaterial: 'wood' | 'concrete' | 'tile' | 'carpet' | 'other';
+}
+
 export interface HousePlan {
   applicationId: string;
   addressLabel: string;
   floors: number;
   rooms: RoomZone[];
+  constructionDetails?: ConstructionDetails;
   createdAt: string;
 }
 
@@ -59,6 +66,9 @@ export interface UserSettings {
   hasCompletedOnboarding: boolean;
   selectedHousePlanId?: string;
   preferredVoiceId?: string;
+  notificationsEnabled?: boolean;
+  analyticsEnabled?: boolean;
+  accountDisabled?: boolean;
 }
 
 // Network Summary
@@ -70,6 +80,32 @@ export interface NetworkSummary {
   };
   lastSpeedTest?: string;
   deviceCount?: number;
+}
+
+// Device Types
+export type DeviceType = 
+  | 'router'
+  | 'extender'
+  | 'smartphone'
+  | 'laptop'
+  | 'tablet'
+  | 'smart-tv'
+  | 'smart-speaker'
+  | 'gaming-console'
+  | 'iot-device'
+  | 'other';
+
+export interface HomeDevice {
+  id: string;
+  name: string;
+  type: DeviceType;
+  roomId?: string;
+  roomName?: string;
+  macAddress?: string;
+  ipAddress?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 

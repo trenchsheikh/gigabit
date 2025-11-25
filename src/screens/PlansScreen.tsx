@@ -1,16 +1,19 @@
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
+import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
@@ -18,8 +21,32 @@ type PlansNavigationProp = StackNavigationProp<RootStackParamList>;
 
 export const PlansScreen: React.FC = () => {
   const navigation = useNavigation<PlansNavigationProp>();
-  const { housePlans } = useAppStore();
+  const { housePlans, deleteHousePlan } = useAppStore();
   const insets = useSafeAreaInsets();
+
+  const handleDelete = (planId: string) => {
+    Alert.alert(
+      'Delete Plan',
+      'Are you sure you want to delete this floor plan? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteHousePlan(planId);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete plan');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -59,11 +86,37 @@ export const PlansScreen: React.FC = () => {
                 })
               }
             >
-              <Text style={styles.planAddress}>{plan.addressLabel}</Text>
-              <Text style={styles.planInfo}>
-                {plan.floors} floor{plan.floors !== 1 ? 's' : ''} • {plan.rooms.length} rooms
-              </Text>
-              <Text style={styles.planId}>ID: {plan.applicationId}</Text>
+              <View style={styles.cardHeader}>
+                <View>
+                  <Text style={styles.planAddress}>{plan.addressLabel}</Text>
+                  <Text style={styles.planInfo}>
+                    {plan.floors} floor{plan.floors !== 1 ? 's' : ''} • {plan.rooms.length} rooms
+                  </Text>
+                  <Text style={styles.planId}>ID: {plan.applicationId}</Text>
+                </View>
+                <View style={styles.cardActions}>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      navigation.navigate('FloorPlanManualInput', {
+                        initialPlan: plan,
+                      });
+                    }}
+                  >
+                    <Ionicons name="pencil" size={20} color={colors.accentBlue} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionButton, styles.deleteButton]}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleDelete(plan.applicationId);
+                    }}
+                  >
+                    <Ionicons name="trash-outline" size={20} color={colors.error} />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </Card>
           ))}
         </ScrollView>
@@ -75,7 +128,7 @@ export const PlansScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -83,14 +136,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingBottom: 16,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2A2A',
+    borderBottomColor: colors.border,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     letterSpacing: -0.5,
   },
   addButton: {
@@ -110,17 +163,37 @@ const styles = StyleSheet.create({
   planAddress: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   planInfo: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   planId: {
     fontSize: 12,
     color: '#999',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  cardActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  deleteButton: {
+    borderColor: colors.error,
+    backgroundColor: '#FFF5F5',
   },
   emptyState: {
     flex: 1,
@@ -135,12 +208,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   emptyDescription: {
     fontSize: 16,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
   },

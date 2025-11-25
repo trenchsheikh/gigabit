@@ -36,18 +36,8 @@ export const CallModal: React.FC<CallModalProps> = ({
   speechRecognitionAvailable = false,
 }) => {
   const insets = useSafeAreaInsets();
-  const [pulseAnimation, setPulseAnimation] = React.useState(false);
   const [callDuration, setCallDuration] = React.useState(0);
   const durationIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  React.useEffect(() => {
-    if (callStatus === 'connecting' || callStatus === 'speaking' || callStatus === 'connected') {
-      const interval = setInterval(() => {
-        setPulseAnimation((prev) => !prev);
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [callStatus]);
 
   // Start call timer when connected
   React.useEffect(() => {
@@ -101,19 +91,21 @@ export const CallModal: React.FC<CallModalProps> = ({
       statusBarTranslucent
       onRequestClose={onEndCall}
     >
-      <View style={[styles.overlay, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <View style={styles.container}>
+      <TouchableOpacity
+        style={[styles.overlay, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+        activeOpacity={1}
+        onPress={onEndCall}
+      >
+        <View
+          style={styles.container}
+          onStartShouldSetResponder={() => true}
+          onResponderTerminationRequest={() => false}
+        >
           {/* Avatar */}
           <View style={styles.avatarContainer}>
             <View style={[styles.avatarCircle, isActive && styles.avatarCircleActive]}>
               <Text style={styles.avatarEmoji}>{agentEmoji}</Text>
             </View>
-            {isActive && (
-              <>
-                <View style={[styles.pulseRing, pulseAnimation && styles.pulseRingActive]} />
-                <View style={[styles.pulseRing2, !pulseAnimation && styles.pulseRingActive]} />
-              </>
-            )}
           </View>
 
           {/* Status Text */}
@@ -172,7 +164,7 @@ export const CallModal: React.FC<CallModalProps> = ({
             <Text style={styles.endCallText}>End Call</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </TouchableOpacity>
     </Modal>
   );
 };
@@ -180,7 +172,7 @@ export const CallModal: React.FC<CallModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -204,33 +196,6 @@ const styles = StyleSheet.create({
   },
   avatarCircleActive: {
     borderColor: '#4CAF50',
-    shadowColor: '#4CAF50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  pulseRing: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 2,
-    borderColor: '#4CAF50',
-    opacity: 0.4,
-  },
-  pulseRing2: {
-    position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    borderWidth: 2,
-    borderColor: '#4CAF50',
-    opacity: 0.2,
-  },
-  pulseRingActive: {
-    opacity: 0.8,
-    transform: [{ scale: 1.1 }],
   },
   durationContainer: {
     marginTop: 16,

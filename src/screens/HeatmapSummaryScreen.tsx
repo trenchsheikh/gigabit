@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { Card } from '../components/Card';
 import { useAppStore } from '../store/useAppStore';
+import { colors } from '../theme/colors';
 
 export const HeatmapSummaryScreen: React.FC = () => {
   const { wifiHeatmap, selectedHousePlan } = useAppStore();
@@ -151,7 +152,7 @@ export const HeatmapSummaryScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   content: {
     padding: 16,
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 16,
   },
   statsRow: {
@@ -181,7 +182,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
   },
   overallStrength: {
     marginTop: 16,
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
   },
   overallLabel: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   overallValue: {
@@ -205,7 +206,7 @@ const styles = StyleSheet.create({
   roomsTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 16,
   },
   roomItem: {
@@ -220,12 +221,12 @@ const styles = StyleSheet.create({
   roomName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   roomFloor: {
     fontSize: 12,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
   },
   roomStrength: {
     marginTop: 8,
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   pointsTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   pointsList: {
@@ -271,22 +272,22 @@ const styles = StyleSheet.create({
   pointStrength: {
     flex: 1,
     fontSize: 14,
-    color: '#FFFFFF',
+    color: colors.textPrimary,
   },
   pointTime: {
     fontSize: 12,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
   },
   morePoints: {
     textAlign: 'center',
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     marginTop: 8,
     fontSize: 12,
   },
   emptyText: {
     textAlign: 'center',
     marginTop: 40,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     fontSize: 16,
   },
 });

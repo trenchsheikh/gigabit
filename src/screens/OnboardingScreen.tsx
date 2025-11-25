@@ -10,6 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
+import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
@@ -119,7 +120,7 @@ export const OnboardingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -140,13 +141,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 16,
   },
   description: {
     fontSize: 16,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -164,11 +165,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#3A3A3A',
+    backgroundColor: colors.border,
     marginHorizontal: 4,
   },
   indicatorActive: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.accentGreen,
     width: 24,
   },
   buttonContainer: {

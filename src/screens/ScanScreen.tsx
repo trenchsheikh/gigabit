@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
+import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
@@ -74,7 +75,7 @@ export const ScanScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -82,14 +83,14 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingBottom: 16,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2A2A',
+    borderBottomColor: colors.border,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     letterSpacing: -0.5,
   },
   content: {
@@ -101,12 +102,12 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   infoDescription: {
     fontSize: 16,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     lineHeight: 24,
   },
   scanButton: {
@@ -118,12 +119,12 @@ const styles = StyleSheet.create({
   statsTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   statsText: {
     fontSize: 14,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   summaryButton: {

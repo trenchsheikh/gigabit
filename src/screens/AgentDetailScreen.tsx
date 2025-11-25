@@ -9,6 +9,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
+import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { RouteProp } from '@react-navigation/native';
 
@@ -116,7 +117,7 @@ export const AgentDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: colors.background,
   },
   content: {
     padding: 24,
@@ -147,14 +148,14 @@ const styles = StyleSheet.create({
   agentTitle: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 12,
     letterSpacing: -0.5,
   },
   agentDescription: {
     fontSize: 16,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 48,
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
   errorText: {
     textAlign: 'center',
     marginTop: 40,
-    color: '#CCCCCC',
+    color: colors.textSecondary,
     fontSize: 16,
   },
 });
