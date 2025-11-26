@@ -40,6 +40,7 @@ export interface HousePlan {
   floors: number;
   rooms: RoomZone[];
   constructionDetails?: ConstructionDetails;
+  floorplanUrl?: string;
   createdAt: string;
 }
 
@@ -59,6 +60,13 @@ export interface WifiHeatmapPoint extends WifiSample {
 export interface WifiHeatmapData {
   points: WifiHeatmapPoint[];
   roomAverages: Record<string, number>; // roomId -> average strength
+}
+
+export interface UserAddress {
+  houseNumber: string;
+  street: string;
+  postcode: string;
+  fullAddress: string;
 }
 
 // User & Settings
@@ -83,7 +91,7 @@ export interface NetworkSummary {
 }
 
 // Device Types
-export type DeviceType = 
+export type DeviceType =
   | 'router'
   | 'extender'
   | 'smartphone'

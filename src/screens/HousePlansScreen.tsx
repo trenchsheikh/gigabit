@@ -1,126 +1,114 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
-  Linking,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
-import { mockHousePlan181392 } from '../data/mockHousePlans';
 import { colors } from '../theme/colors';
+import { Ionicons } from '@expo/vector-icons';
 import type { RootStackParamList } from '../navigation/types';
 import type { StackNavigationProp } from '@react-navigation/stack';
-
-const PLANNING_PORTAL_URL =
-  'https://publicaccess.easthants.gov.uk/planning/index.html?fa=getApplication&id=181392';
+import { HousePlan } from '../types';
 
 type HousePlansNavigationProp = StackNavigationProp<RootStackParamList>;
 
 export const HousePlansScreen: React.FC = () => {
   const navigation = useNavigation<HousePlansNavigationProp>();
-  const { addHousePlan, selectHousePlan } = useAppStore();
-  const [address, setAddress] = useState('');
-  const [postcode, setPostcode] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { housePlans, selectHousePlan, deleteHousePlan } = useAppStore();
 
-  const handleSubmit = async () => {
-    if (!address.trim() || !postcode.trim()) {
-      Alert.alert('Validation Error', 'Please fill in address and postcode');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // For MVP, use the mocked plan for any valid input
-      const fullAddress = `${address.trim()}, ${postcode.trim()}`;
-      const plan = {
-        ...mockHousePlan181392,
-        addressLabel: fullAddress,
-      };
-
-      await addHousePlan(plan);
-      selectHousePlan(plan);
-      Alert.alert(
-        'Success',
-        'House plan added successfully!',
-        [
-          {
-            text: 'View Details',
-            onPress: () =>
-              navigation.navigate('HousePlanDetail', {
-                planId: plan.applicationId,
-              }),
-          },
-          { text: 'OK' },
-        ]
-      );
-    } catch (error) {
-      Alert.alert('Error', 'Failed to add house plan. Please try again.');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+  const handleAddPlan = () => {
+    navigation.navigate('FloorPlanSearch');
   };
 
-  const handleViewPlanningPortal = async () => {
-    try {
-      await Linking.openURL(PLANNING_PORTAL_URL);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to open planning portal');
-    }
+  const handleSelectPlan = (plan: HousePlan) => {
+    selectHousePlan(plan);
+    navigation.navigate('HousePlanDetail', { planId: plan.applicationId });
   };
+
+  const handleDeletePlan = (plan: HousePlan) => {
+    Alert.alert(
+      'Delete Plan',
+      'Are you sure you want to delete this floor plan?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteHousePlan(plan.applicationId),
+        },
+      ]
+    );
+  };
+
+  const renderPlanItem = ({ item }: { item: HousePlan }) => (
+    <TouchableOpacity onPress={() => handleSelectPlan(item)}>
+      <Card style={styles.planCard}>
+        <View style={styles.planHeader}>
+          <View style={styles.iconContainer}>
+            <Text style={styles.planIcon}>🏠</Text>
+          </View>
+          <View style={styles.planInfo}>
+            <Text style={styles.planAddress} numberOfLines={1}>
+              {item.addressLabel || 'My Home'}
+            </Text>
+            <Text style={styles.planDetails}>
+              {item.floors} Floors • {item.rooms.length} Rooms
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => handleDeletePlan(item)}
+          >
+            <Ionicons name="trash-outline" size={20} color={colors.error} />
+          </TouchableOpacity>
+        </View>
+      </Card>
+    </TouchableOpacity>
+  );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Card style={styles.card}>
-        <Text style={styles.title}>Add House Plan</Text>
-        <Text style={styles.description}>
-          Enter your address to load your house plan. For MVP, we support the
-          East Hampshire planning application 181392.
-        </Text>
-
-        <Text style={styles.label}>Street Address *</Text>
-        <TextInput
-          style={styles.input}
-          value={address}
-          onChangeText={setAddress}
-          placeholder="e.g., 123 Main Street"
-        />
-
-        <Text style={styles.label}>Postcode *</Text>
-        <TextInput
-          style={styles.input}
-          value={postcode}
-          onChangeText={setPostcode}
-          placeholder="e.g., GU35 0AB"
-          autoCapitalize="characters"
-        />
-
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>My Floor Plans</Text>
         <Button
-          title="Load Plan"
-          onPress={handleSubmit}
+          title="Add Plan"
+          onPress={handleAddPlan}
           variant="primary"
-          loading={loading}
-          style={styles.submitButton}
+          style={styles.addButton}
+          icon={<Ionicons name="add" size={20} color="#FFF" />}
         />
+      </View>
 
-        <TouchableOpacity
-          style={styles.linkContainer}
-          onPress={handleViewPlanningPortal}
-        >
-          <Text style={styles.linkText}>
-            View Planning Application Online →
+      {housePlans.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyIcon}>📝</Text>
+          <Text style={styles.emptyTitle}>No Floor Plans Yet</Text>
+          <Text style={styles.emptyDescription}>
+            Add a floor plan to start optimizing your WiFi network.
           </Text>
-        </TouchableOpacity>
-      </Card>
-    </ScrollView>
+          <Button
+            title="Add Your First Plan"
+            onPress={handleAddPlan}
+            variant="primary"
+            style={styles.emptyButton}
+          />
+        </View>
+      ) : (
+        <FlatList
+          data={housePlans}
+          renderItem={renderPlanItem}
+          keyExtractor={(item) => item.applicationId}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
+    </View>
   );
 };
 
@@ -128,52 +116,90 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    paddingTop: 20,
   },
-  content: {
-    padding: 16,
-  },
-  card: {
-    marginBottom: 16,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.textPrimary,
+  },
+  addButton: {
+    paddingHorizontal: 16,
+    height: 40,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  planCard: {
+    marginBottom: 16,
+    padding: 16,
+  },
+  planHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.backgroundSecondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  planIcon: {
     fontSize: 24,
+  },
+  planInfo: {
+    flex: 1,
+  },
+  planAddress: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 4,
+  },
+  planDetails: {
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  deleteButton: {
+    padding: 8,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    marginTop: -40,
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: colors.textPrimary,
     marginBottom: 8,
   },
-  description: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 24,
-    lineHeight: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: 8,
-    marginTop: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 12,
+  emptyDescription: {
     fontSize: 16,
-    backgroundColor: colors.cardBackground,
-    color: colors.textPrimary,
-  },
-  submitButton: {
-    marginTop: 24,
-  },
-  linkContainer: {
-    marginTop: 16,
-    paddingVertical: 12,
-  },
-  linkText: {
-    fontSize: 14,
-    color: colors.accentBlue,
+    color: colors.textSecondary,
     textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  emptyButton: {
+    width: '100%',
   },
 });
 

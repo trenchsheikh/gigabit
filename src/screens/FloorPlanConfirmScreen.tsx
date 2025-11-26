@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -7,6 +7,7 @@ import { useAppStore } from '../store/useAppStore';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { colors } from '../theme/colors';
+import { postcodeService } from '../services/postcode';
 
 type NavigationProp = StackNavigationProp<RootStackParamList, 'FloorPlanConfirm'>;
 type ScreenRouteProp = RouteProp<RootStackParamList, 'FloorPlanConfirm'>;
@@ -15,13 +16,55 @@ export const FloorPlanConfirmScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ScreenRouteProp>();
   const { plan } = route.params;
-  const { addHousePlan, selectHousePlan } = useAppStore();
+  const { addHousePlan, selectHousePlan, setUserPostcode, setUserAddress } = useAppStore();
 
   const handleConfirm = async () => {
     // Save the plan to the store
     await addHousePlan(plan);
     selectHousePlan(plan);
-    
+
+    // Parse and save user address
+    const parts = plan.addressLabel.split(',');
+    const postcode = parts[parts.length - 1]?.trim() || '';
+    const streetPart = parts[0]?.trim() || '';
+
+    const numberMatch = streetPart.match(/^(\d+)/);
+    const houseNumber = numberMatch ? numberMatch[1] : '';
+    const street = streetPart.replace(/^(\d+)/, '').trim();
+
+    if (postcode) {
+      try {
+        const postcodeData = await postcodeService.searchPostcode(postcode);
+        if (postcodeData) {
+          await setUserPostcode(postcode, postcodeData);
+        } else {
+          // Fallback if lookup fails
+          await setUserPostcode(postcode, {
+            postcode,
+            quality: 1,
+            country: 'United Kingdom',
+            admin_district: 'Unknown',
+            parish: 'Unknown',
+          });
+        }
+      } catch (e) {
+        console.error('Failed to fetch postcode data', e);
+        // Fallback
+        await setUserPostcode(postcode, {
+          postcode,
+          quality: 1,
+          country: 'United Kingdom',
+        });
+      }
+    }
+
+    await setUserAddress({
+      houseNumber,
+      street,
+      postcode,
+      fullAddress: plan.addressLabel,
+    });
+
     // Navigate to the main app (Plans tab)
     navigation.reset({
       index: 0,
@@ -30,7 +73,7 @@ export const FloorPlanConfirmScreen: React.FC = () => {
   };
 
   const handleReject = () => {
-    navigation.replace('FloorPlanManualInput');
+    navigation.replace('FloorPlanManualInput', {});
   };
 
   return (
@@ -46,10 +89,16 @@ export const FloorPlanConfirmScreen: React.FC = () => {
 
         <Card style={styles.card}>
           <View style={styles.planPreview}>
-            <Text style={styles.placeholderIcon}>🗺️</Text>
-            <Text style={styles.placeholderText}>Floor Plan Preview</Text>
+            {plan.floorplanUrl ? (
+              <Image source={{ uri: plan.floorplanUrl }} style={styles.planImage} />
+            ) : (
+              <>
+                <Text style={styles.placeholderIcon}>🗺️</Text>
+                <Text style={styles.placeholderText}>Floor Plan Preview</Text>
+              </>
+            )}
           </View>
-          
+
           <View style={styles.details}>
             <Text style={styles.address}>{plan.addressLabel}</Text>
             <View style={styles.statsRow}>
@@ -119,14 +168,26 @@ const styles = StyleSheet.create({
     padding: 0,
     overflow: 'hidden',
     marginBottom: 32,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 16,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   planPreview: {
-    height: 200,
+    height: 250,
     backgroundColor: colors.backgroundSecondary,
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+  },
+  planImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
   },
   placeholderIcon: {
     fontSize: 48,

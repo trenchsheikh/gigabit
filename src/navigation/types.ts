@@ -2,7 +2,7 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootStackParamList = {
   SignIn: undefined;
-  Postcode: undefined;
+  AddressEntry: undefined;
   Onboarding: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   SpeedTest: undefined;
@@ -15,7 +15,7 @@ export type RootStackParamList = {
   AccountSettings: undefined;
   FloorPlanSearch: undefined;
   FloorPlanConfirm: { plan: any }; // Using any for now to avoid circular dependency, or import HousePlan
-  FloorPlanManualInput: { initialPlan?: any }; // Using any for now to avoid circular dependency
+  FloorPlanManualInput: { initialPlan?: any; address?: string }; // Using any for now to avoid circular dependency
 };
 
 export type MainTabParamList = {

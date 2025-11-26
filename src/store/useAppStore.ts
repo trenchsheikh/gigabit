@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { CustomAgent, ChatMessage, HousePlan, WifiHeatmapData, UserSettings, NetworkSummary, HomeDevice } from '../types';
+import type { CustomAgent, ChatMessage, HousePlan, WifiHeatmapData, UserSettings, NetworkSummary, HomeDevice, UserAddress } from '../types';
 import type { PostcodeData } from '../services/postcode';
 import { storageService } from '../services/storage';
 
@@ -8,6 +8,7 @@ interface AppState {
   isAuthenticated: boolean;
   username: string | null;
   userPostcode: string | null;
+  userAddress: UserAddress | null;
   postcodeData: PostcodeData | null;
   agents: CustomAgent[];
   selectedAgent: CustomAgent | null;
@@ -23,6 +24,7 @@ interface AppState {
   signIn: (username: string) => Promise<void>;
   signOut: () => Promise<void>;
   setUserPostcode: (postcode: string, data: PostcodeData) => Promise<void>;
+  setUserAddress: (address: UserAddress) => Promise<void>;
   loadInitialData: () => Promise<void>;
   addAgent: (agent: CustomAgent) => Promise<void>;
   updateAgent: (agent: CustomAgent) => Promise<void>;
@@ -47,6 +49,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   isAuthenticated: false,
   username: null,
   userPostcode: null,
+  userAddress: null,
   postcodeData: null,
   agents: [],
   selectedAgent: null,
@@ -65,8 +68,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   signOut: async () => {
     await storageService.clearAuthData();
-    set({ 
-      isAuthenticated: false, 
+    set({
+      isAuthenticated: false,
       username: null,
       userPostcode: null,
       postcodeData: null,
@@ -76,6 +79,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUserPostcode: async (postcode: string, data: PostcodeData) => {
     await storageService.savePostcodeData(postcode, data);
     set({ userPostcode: postcode, postcodeData: data });
+  },
+
+  setUserAddress: async (address: UserAddress) => {
+    // Save to storage (mock implementation for now, or add to storageService)
+    set({ userAddress: address });
   },
 
   loadInitialData: async () => {
@@ -182,11 +190,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateHousePlan: async (plan) => {
     await storageService.saveHousePlan(plan);
     set((state) => ({
-      housePlans: state.housePlans.map((p) => 
+      housePlans: state.housePlans.map((p) =>
         p.applicationId === plan.applicationId ? plan : p
       ),
-      selectedHousePlan: state.selectedHousePlan?.applicationId === plan.applicationId 
-        ? plan 
+      selectedHousePlan: state.selectedHousePlan?.applicationId === plan.applicationId
+        ? plan
         : state.selectedHousePlan,
     }));
   },
@@ -195,8 +203,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     await storageService.deleteHousePlan(applicationId);
     set((state) => ({
       housePlans: state.housePlans.filter((p) => p.applicationId !== applicationId),
-      selectedHousePlan: state.selectedHousePlan?.applicationId === applicationId 
-        ? null 
+      selectedHousePlan: state.selectedHousePlan?.applicationId === applicationId
+        ? null
         : state.selectedHousePlan,
     }));
   },

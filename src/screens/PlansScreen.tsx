@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    ScrollView,
-    Alert,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -54,7 +54,7 @@ export const PlansScreen: React.FC = () => {
         <Text style={styles.title}>House Plans</Text>
         <Button
           title="+ Add Plan"
-          onPress={() => navigation.navigate('HousePlans')}
+          onPress={() => navigation.navigate('FloorPlanSearch')}
           variant="primary"
           style={styles.addButton}
         />
@@ -69,7 +69,7 @@ export const PlansScreen: React.FC = () => {
           </Text>
           <Button
             title="Add Plan"
-            onPress={() => navigation.navigate('HousePlans')}
+            onPress={() => navigation.navigate('FloorPlanSearch')}
             variant="primary"
             style={styles.createButton}
           />

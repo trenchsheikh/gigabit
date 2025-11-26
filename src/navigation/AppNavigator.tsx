@@ -33,7 +33,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 const MainTabs = () => {
   const insets = useSafeAreaInsets();
-  
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -147,7 +147,11 @@ export const AppNavigator: React.FC = () => {
         {!isAuthenticated ? (
           <Stack.Screen name="SignIn" component={SignInScreen} />
         ) : !userPostcode ? (
-          <Stack.Screen name="Postcode" component={PostcodeScreen} />
+          <Stack.Screen
+            name="AddressEntry"
+            component={FloorPlanSearchScreen}
+            options={{ headerShown: false }}
+          />
         ) : !userSettings.hasCompletedOnboarding ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         ) : (
@@ -185,11 +189,11 @@ export const AppNavigator: React.FC = () => {
               }}
             />
             <Stack.Screen
-              name="Postcode"
-              component={PostcodeScreen}
+              name="AddressEntry"
+              component={FloorPlanSearchScreen}
               options={{
                 headerShown: true,
-                title: 'Update Postcode',
+                title: 'Update Address',
                 headerStyle: {
                   backgroundColor: colors.cardBackground,
                   elevation: 0,
@@ -289,7 +293,7 @@ export const AppNavigator: React.FC = () => {
                 const agentId = params?.agentId;
                 const agents = useAppStore.getState().agents;
                 const agent = agentId ? agents.find((a) => a.id === agentId) : null;
-                
+
                 return {
                   headerShown: true,
                   title: agent?.name || 'Chat',

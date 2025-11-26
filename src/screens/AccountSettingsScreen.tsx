@@ -22,7 +22,7 @@ type AccountSettingsNavigationProp = StackNavigationProp<RootStackParamList, 'Ac
 export const AccountSettingsScreen: React.FC = () => {
   const navigation = useNavigation<AccountSettingsNavigationProp>();
   const insets = useSafeAreaInsets();
-  const { userSettings, userPostcode, postcodeData, updateUserSettings, signOut } = useAppStore();
+  const { userSettings, userPostcode, userAddress, postcodeData, updateUserSettings, signOut } = useAppStore();
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     userSettings.notificationsEnabled ?? true
   );
@@ -84,8 +84,8 @@ export const AccountSettingsScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView 
-      style={styles.container} 
+    <ScrollView
+      style={styles.container}
       contentContainerStyle={[
         styles.content,
         { paddingTop: Math.max(insets.top, 20) + 16 }
@@ -102,7 +102,14 @@ export const AccountSettingsScreen: React.FC = () => {
           <Text style={styles.infoLabel}>Username</Text>
           <Text style={styles.infoValue}>admin</Text>
         </View>
-        {userPostcode && (
+        {userAddress ? (
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Address</Text>
+            <Text style={[styles.infoValue, { maxWidth: '60%', textAlign: 'right' }]} numberOfLines={2}>
+              {userAddress.fullAddress}
+            </Text>
+          </View>
+        ) : userPostcode && (
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Postcode</Text>
             <Text style={styles.infoValue}>{userPostcode}</Text>
@@ -122,7 +129,7 @@ export const AccountSettingsScreen: React.FC = () => {
       {/* Settings */}
       <Card style={styles.card}>
         <Text style={styles.sectionTitle}>Preferences</Text>
-        
+
         <View style={styles.settingRow}>
           <View style={styles.settingContent}>
             <Text style={styles.settingLabel}>Notifications</Text>
@@ -161,12 +168,12 @@ export const AccountSettingsScreen: React.FC = () => {
       {/* Actions */}
       <Card style={styles.card}>
         <Text style={styles.sectionTitle}>Actions</Text>
-        
+
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.navigate('Postcode')}
+          onPress={() => navigation.navigate('AddressEntry')}
         >
-          <Text style={styles.actionButtonText}>Update Postcode</Text>
+          <Text style={styles.actionButtonText}>Update Address</Text>
           <Text style={styles.actionButtonIcon}>→</Text>
         </TouchableOpacity>
 

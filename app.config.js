@@ -19,6 +19,11 @@ module.exports = {
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.gigabit.wifiai',
+      infoPlist: {
+        NSAppTransportSecurity: {
+          NSAllowsArbitraryLoads: true,
+        },
+      },
     },
     android: {
       // adaptiveIcon: {
