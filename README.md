@@ -1,169 +1,112 @@
 # GigaBit WiFi AI App
 
-A production-quality mobile app built with React Native, Expo, and TypeScript that helps users optimize their home WiFi networks through AI-powered assistance, speed testing, AR heatmap scanning, and house plan integration.
+A production-ready mobile application built with React Native and Expo that empowers users to optimize their home WiFi networks. It features AI-powered assistance, real-time device monitoring, AR signal heatmaps, and intelligent floor plan integration.
 
-## Features
+## 🚀 Features
 
-- **Onboarding Flow**: Welcome screens to introduce users to the app
-- **Dashboard**: Overview of network status and quick actions
-- **Speed Test**: Integrated WebView for network speed testing
-- **Custom AI Agents**: Create and chat with specialized WiFi optimization AI agents powered by OpenAI
-- **Text-to-Speech**: ElevenLabs integration for audio playback of AI responses
-- **House Plans**: Address input and house plan visualization (MVP supports East Hampshire planning application 181392)
-- **AR WiFi Heatmap**: Camera-based scanning to visualize WiFi signal strength throughout the home
-- **State Management**: Zustand for global state with AsyncStorage persistence
+- **AI WiFi Assistant**: Chat with specialized AI agents powered by OpenAI to troubleshoot network issues.
+- **Real-Time Device Monitoring**: View connected devices, signal strength, and usage statistics (integrated with Calix).
+- **Smart Floor Plans**: Automatically find and visualize floor plans based on address using intelligent scraping.
+- **AR Heatmap**: Visualize WiFi signal strength in your home using Augmented Reality.
+- **Speed Test**: Integrated network speed testing.
+- **Voice Integration**: Text-to-Speech responses using ElevenLabs.
 
-## Tech Stack
+## 🛠 Tech Stack
 
-- **React Native** with **Expo** (SDK ~51)
-- **TypeScript** for type safety
-- **React Navigation** (Stack + Bottom Tabs)
-- **Zustand** for state management
-- **AsyncStorage** for data persistence
-- **react-native-webview** for speed test integration
-- **expo-camera** for AR heatmap scanning
-- **expo-av** for audio playback
-- **OpenAI API** for AI chat completions
-- **ElevenLabs API** for text-to-speech
+- **Framework**: React Native with Expo (SDK 51)
+- **Language**: TypeScript
+- **Navigation**: React Navigation (Stack + Bottom Tabs)
+- **State Management**: Zustand
+- **API Integration**: Axios, Cheerio (replaced with node-html-parser for RN compatibility)
+- **AI/ML**: OpenAI API, ElevenLabs API
+- **Backend Logic**: Serverless architecture (migrated from Express to client-side services)
 
-## Setup
+## 📋 Prerequisites
 
-1. **Install dependencies:**
+- Node.js (v18 or higher)
+- npm or yarn
+- Expo Go app (for testing on physical devices)
+
+## ⚙️ Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd GigaBit
+   ```
+
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Configure environment variables:**
-   - Copy `.env.example` to `.env`
-   - Add your API keys:
-     ```
-     OPENAI_API_KEY=your_openai_api_key_here
-     ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
-     ```
+## 🔑 Configuration
 
-3. **Start the development server:**
+Create a `.env` file in the root directory and configure the following keys. 
+
+> **Note:** Variables prefixed with `EXPO_PUBLIC_` are accessible to the Expo client application.
+
+```env
+# AI Services
+OPENAI_API_KEY=your_openai_key
+ELEVENLABS_API_KEY=your_elevenlabs_key
+
+# Calix Integration (Device Monitoring)
+EXPO_PUBLIC_CALIX_BASE_URL=https://api.calix.ai/v1/csc/insights
+EXPO_PUBLIC_CALIX_AUTH_URL=https://api.calix.ai/v1/authentication/token
+EXPO_PUBLIC_CALIX_CLIENT_ID=your_calix_client_id
+EXPO_PUBLIC_CALIX_CLIENT_SECRET=your_calix_client_secret
+EXPO_PUBLIC_CALIX_USERNAME=your_calix_username
+EXPO_PUBLIC_CALIX_PASSWORD=your_calix_password
+EXPO_PUBLIC_CALIX_TENANT=your_tenant_id (optional)
+
+# Address Services
+EXPO_PUBLIC_GETADDRESS_API_KEY=your_getaddress_key
+```
+
+## 📱 Running the App
+
+The application runs entirely on the client side. No separate backend server process is required.
+
+1. **Start the development server:**
    ```bash
-   npm start
+   npx expo start
    ```
 
-4. **Run on your device:**
-   - Press `i` for iOS simulator
-   - Press `a` for Android emulator
-   - Scan QR code with Expo Go app on your physical device
+2. **Run on your device:**
+   - **iOS**: Press `i` to run in Simulator, or scan the QR code with the Camera app (requires Expo Go).
+   - **Android**: Press `a` to run in Emulator, or scan the QR code with the Expo Go app.
 
-## Project Structure
+## 🏗 Project Structure
 
 ```
-├── src/
-│   ├── components/          # Reusable UI components
-│   │   ├── Button.tsx
-│   │   ├── Card.tsx
-│   │   ├── ErrorView.tsx
-│   │   └── LoadingSpinner.tsx
-│   ├── config/              # Configuration files
-│   │   └── env.ts           # Environment variables
-│   ├── data/                # Mock data
-│   │   └── mockHousePlans.ts
-│   ├── navigation/          # Navigation setup
-│   │   ├── AppNavigator.tsx
-│   │   └── types.ts
-│   ├── screens/             # Screen components
-│   │   ├── OnboardingScreen.tsx
-│   │   ├── DashboardScreen.tsx
-│   │   ├── SpeedTestScreen.tsx
-│   │   ├── AgentsScreen.tsx
-│   │   ├── AIAgentChatScreen.tsx
-│   │   ├── CreateAgentScreen.tsx
-│   │   ├── PlansScreen.tsx
-│   │   ├── HousePlansScreen.tsx
-│   │   ├── HousePlanDetailScreen.tsx
-│   │   ├── ScanScreen.tsx
-│   │   ├── ARHeatmapScreen.tsx
-│   │   └── HeatmapSummaryScreen.tsx
-│   ├── services/            # API services
-│   │   ├── openai.ts
-│   │   ├── elevenlabs.ts
-│   │   └── storage.ts
-│   ├── store/               # State management
-│   │   └── useAppStore.ts
-│   └── types/               # TypeScript types
-│       └── index.ts
-├── App.tsx                  # App entry point
-├── app.json                 # Expo configuration
-├── package.json
-└── tsconfig.json
+src/
+├── components/          # Reusable UI components
+├── screens/             # Application screens
+├── navigation/          # Navigation configuration
+├── services/            # Business logic and API clients
+│   ├── api/             # External API integrations (Calix, Floorplan)
+│   └── ...
+├── store/               # Global state management (Zustand)
+├── types/               # TypeScript definitions
+└── utils/               # Helper functions
 ```
 
-## Key Features Implementation
+## 📦 Deployment
 
-### Speed Test
-- Uses `react-native-webview` to embed `https://gigabitiq.speedtestcustom.com/`
-- Includes loading states and error handling
-- Full-screen integration
+### Building for TestFlight (iOS)
 
-### Custom AI Agents
-- Create agents with custom names, descriptions, roles, and system instructions
-- Chat interface with message history
-- OpenAI GPT-4o integration
-- Persistent storage using AsyncStorage
+1. **Configure EAS:**
+   Ensure `eas.json` is configured with your build profile (e.g., `production`).
 
-### Text-to-Speech
-- ElevenLabs API integration
-- Audio playback for AI responses
-- Play/pause controls
-
-### House Plans
-- Address input form
-- Mocked house plan data for East Hampshire planning application 181392
-- Room-by-room visualization
-- Link to planning portal
-
-### AR WiFi Heatmap
-- Camera-based scanning interface
-- Tap-to-log WiFi strength points
-- Color-coded visualization (green = strong, red = weak)
-- Room-based analysis when house plan is selected
-- Summary screen with statistics
-
-## Environment Variables
-
-The app uses environment variables for API keys. Make sure to:
-
-1. Create a `.env` file in the root directory
-2. Add your API keys:
+2. **Run Build:**
+   ```bash
+   eas build --platform ios --profile production
    ```
-   OPENAI_API_KEY=sk-...
-   ELEVENLABS_API_KEY=...
-   ```
-3. The app reads these via `expo-constants` (configured in `app.json`)
 
-## Permissions
+3. **Submit:**
+   Once built, you can submit to TestFlight via EAS or download the IPA and upload via Transporter.
 
-The app requires the following permissions:
-- **Camera**: For AR heatmap scanning
-- **Network**: For API calls and WebView content
+## 📄 License
 
-These are configured in `app.json` and requested at runtime.
-
-## Notes
-
-- The AR heatmap uses mock WiFi strength data for MVP. In production, you would integrate with platform-specific WiFi APIs.
-- House plans are currently mocked for the specific East Hampshire planning application. Future versions would integrate with actual planning portal APIs.
-- The app follows the Figma prototype design as closely as possible with the provided information.
-
-## Development
-
-- TypeScript strict mode enabled
-- All components are strongly typed
-- Error boundaries and loading states implemented throughout
-- Clean separation of concerns (services, components, screens, state)
-
-## License
-
-Private project - All rights reserved
-
-
-
-
-
-
+Private and Confidential. All rights reserved.
