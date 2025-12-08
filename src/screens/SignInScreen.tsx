@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Alert,
-  TouchableOpacity,
-  Image,
+    View,
+    Text,
+    StyleSheet,
+    TextInput,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Alert,
+    TouchableOpacity,
+    Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,12 +40,7 @@ export const SignInScreen: React.FC = () => {
     // Simple authentication check (using email as username)
     if (email === 'admin' && password === 'pass') {
       await signIn(email);
-      const { userPostcode } = useAppStore.getState();
-      if (!userPostcode) {
-        navigation.replace('Postcode');
-      } else {
-        navigation.replace('Main');
-      }
+      // AppNavigator handles navigation based on auth state
     } else {
       Alert.alert('Error', 'Invalid email or password');
     }
@@ -63,9 +58,12 @@ export const SignInScreen: React.FC = () => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Logo/Branding Top Left */}
+        {/* Logo/Branding Top Center */}
         <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>GigaBit</Text>
+          <Image 
+            source={require('../../assets/logo.png')} 
+            style={styles.logoImage}
+          />
         </View>
 
         {/* Main Content */}
@@ -201,9 +199,16 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     position: 'absolute',
-    top: 50,
-    left: 20,
+    top: 60,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
     zIndex: 10,
+  },
+  logoImage: {
+    width: 200,
+    height: 50,
+    resizeMode: 'contain',
   },
   logoText: {
     fontSize: 18,

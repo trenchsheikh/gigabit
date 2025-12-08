@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio';
+import { parse } from 'node-html-parser';
 
 // Types
 export interface ListingSummary {
@@ -43,9 +43,11 @@ export async function searchListings(postcode: string): Promise<Array<ListingSum
     // Rightmove search URL pattern - Refined for exact postcode area
     const searchUrl = `${BASE_URL}/property-for-sale/search.html?searchLocation=${encodeURIComponent(postcode)}&useLocationIdentifier=false&locationIdentifier=&buy=For+sale&radius=0.0&_includeSSTC=on`;
 
-    console.log(`Searching listings at: ${searchUrl}`);
+    if (__DEV__) {
+        console.log(`Searching listings at: ${searchUrl}`);
+    }
     const html = await fetchHtml(searchUrl);
-    const $ = cheerio.load(html);
+    const root = parse(html);
     const listings: ListingSummary[] = [];
 
     // Rightmove property card selectors (approximate, based on common structures)
@@ -53,9 +55,12 @@ export async function searchListings(postcode: string): Promise<Array<ListingSum
     // or common class patterns.
 
     // Strategy: Look for property card containers
-    $('.propertyCard').each((_, element) => {
-        const address = $(element).find('.propertyCard-address').text().trim();
-        const relativeUrl = $(element).find('.propertyCard-link').attr('href');
+    root.querySelectorAll('.propertyCard').forEach((element) => {
+        const addressEl = element.querySelector('.propertyCard-address');
+        const linkEl = element.querySelector('.propertyCard-link');
+        
+        const address = addressEl?.text.trim();
+        const relativeUrl = linkEl?.getAttribute('href');
 
         if (address && relativeUrl && !relativeUrl.includes('contactBranch')) {
             listings.push({
@@ -67,10 +72,12 @@ export async function searchListings(postcode: string): Promise<Array<ListingSum
 
     // Fallback: Try newer Rightmove selectors if the above fails
     if (listings.length === 0) {
-        $('[class*="propertyCard"]').each((_, element) => {
-            const address = $(element).find('address').text().trim() ||
-                $(element).find('[class*="address"]').text().trim();
-            const relativeUrl = $(element).find('a[class*="link"]').attr('href');
+        root.querySelectorAll('[class*="propertyCard"]').forEach((element) => {
+            const addressEl = element.querySelector('address') || element.querySelector('[class*="address"]');
+            const linkEl = element.querySelector('a[class*="link"]');
+
+            const address = addressEl?.text.trim();
+            const relativeUrl = linkEl?.getAttribute('href');
 
             if (address && relativeUrl && !relativeUrl.includes('contactBranch')) {
                 listings.push({
@@ -108,63 +115,68 @@ export function pickBestMatch(listings: ListingSummary[], houseNumber: string, s
 
 // 4. Extract Floorplan URL
 export async function extractFloorplanUrl(detailUrl: string): Promise<string | null> {
-    console.log(`Extracting floorplan from: ${detailUrl}`);
+    if (__DEV__) {
+        console.log(`Extracting floorplan from: ${detailUrl}`);
+    }
     try {
         const html = await fetchHtml(detailUrl);
-        const $ = cheerio.load(html);
+        const root = parse(html);
 
         let floorplanUrl: string | null = null;
 
         // Strategy 1: Look for <img> tags with "floorplan" in alt or src
-        $('img').each((_, element) => {
-            const alt = $(element).attr('alt')?.toLowerCase() || '';
-            const src = $(element).attr('src');
+        const images = root.querySelectorAll('img');
+        for (const element of images) {
+            const alt = element.getAttribute('alt')?.toLowerCase() || '';
+            const src = element.getAttribute('src');
 
             if (src && (alt.includes('floor plan') || alt.includes('floorplan'))) {
                 floorplanUrl = src;
-                return false; // Break loop
+                break; 
             }
-        });
+        }
 
         if (floorplanUrl) return floorplanUrl;
 
         // Strategy 2: Look for specific Rightmove floorplan tabs/links
         // Rightmove often puts floorplans in a separate tab or gallery
         // Look for links that might open a floorplan gallery
-        $('a').each((_, element) => {
-            const href = $(element).attr('href');
+        const links = root.querySelectorAll('a');
+        for (const element of links) {
+            const href = element.getAttribute('href');
             if (href && href.includes('floorplan')) {
                 // Often these are API calls or separate pages, but sometimes direct images
                 if (href.match(/\.(jpg|jpeg|png|gif)$/i)) {
                     floorplanUrl = href;
-                    return false;
+                    break;
                 }
             }
-        });
+        }
 
         if (floorplanUrl) return floorplanUrl;
 
         // Strategy 3: Look for script data (PAGE_MODEL)
         // Rightmove often embeds data in a script tag
-        const scriptContent = $('script').filter((_, el) => {
-            return ($(el).html() || '').includes('PAGE_MODEL');
-        }).html();
-
-        if (scriptContent) {
-            try {
-                // Very rough extraction of the JSON object
-                const match = scriptContent.match(/PAGE_MODEL\s*=\s*({.+?});/);
-                if (match && match[1]) {
-                    const pageModel = JSON.parse(match[1]);
-                    // Traverse for floorplans
-                    // Note: Structure varies, this is a guess based on common React props
-                    const floorplans = pageModel?.propertyData?.floorplans;
-                    if (Array.isArray(floorplans) && floorplans.length > 0) {
-                        floorplanUrl = floorplans[0].url;
+        const scripts = root.querySelectorAll('script');
+        for (const el of scripts) {
+            const content = el.text || '';
+            if (content.includes('PAGE_MODEL')) {
+                 try {
+                    // Very rough extraction of the JSON object
+                    const match = content.match(/PAGE_MODEL\s*=\s*({.+?});/);
+                    if (match && match[1]) {
+                        const pageModel = JSON.parse(match[1]);
+                        // Traverse for floorplans
+                        // Note: Structure varies, this is a guess based on common React props
+                        const floorplans = pageModel?.propertyData?.floorplans;
+                        if (Array.isArray(floorplans) && floorplans.length > 0) {
+                            floorplanUrl = floorplans[0].url;
+                            break;
+                        }
                     }
+                } catch (e) {
+                    console.log('Failed to parse PAGE_MODEL', e);
                 }
-            } catch (e) {
-                console.log('Failed to parse PAGE_MODEL', e);
             }
         }
 
@@ -182,28 +194,36 @@ export async function getFloorplanForAddress(postcode: string, houseNumber: stri
     // Check Cache
     const cached = cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-        console.log('Returning cached floorplan result');
+        if (__DEV__) {
+            console.log('Returning cached floorplan result');
+        }
         return cached.data;
     }
 
     // 1. Search
     const listings = await searchListings(postcode);
     if (listings.length === 0) {
-        console.log('No listings found');
+        if (__DEV__) {
+            console.log('No listings found');
+        }
         return null;
     }
 
     // 2. Match
     const match = pickBestMatch(listings, houseNumber, street);
     if (!match) {
-        console.log('No matching listing found');
+        if (__DEV__) {
+            console.log('No matching listing found');
+        }
         return null;
     }
 
     // 3. Extract
     const floorplanUrl = await extractFloorplanUrl(match.detailUrl);
     if (!floorplanUrl) {
-        console.log('No floorplan found in listing');
+        if (__DEV__) {
+            console.log('No floorplan found in listing');
+        }
         return null;
     }
 

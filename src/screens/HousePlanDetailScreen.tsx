@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Linking,
-  Alert,
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    TouchableOpacity,
+    Linking,
+    Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Card } from '../components/Card';
@@ -15,12 +15,15 @@ import { colors } from '../theme/colors';
 import type { RootStackParamList } from '../navigation/types';
 import type { RouteProp } from '@react-navigation/native';
 
+import { Ionicons } from '@expo/vector-icons';
+
 const PLANNING_PORTAL_URL =
   'https://publicaccess.easthants.gov.uk/planning/index.html?fa=getApplication&id=181392';
 
 type HousePlanDetailRouteProp = RouteProp<RootStackParamList, 'HousePlanDetail'>;
 
 export const HousePlanDetailScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
   const route = useRoute<HousePlanDetailRouteProp>();
   const { planId } = route.params;
   const { housePlans } = useAppStore();
@@ -68,6 +71,13 @@ export const HousePlanDetailScreen: React.FC = () => {
         <Text style={styles.info}>
           {plan.floors} floor{plan.floors !== 1 ? 's' : ''} • {plan.rooms.length} rooms
         </Text>
+        <TouchableOpacity 
+            style={styles.editButton}
+            onPress={() => navigation.navigate('FloorPlanCreator', { initialPlan: plan })}
+        >
+            <Ionicons name="create-outline" size={20} color={colors.accentBlue} />
+            <Text style={styles.editButtonText}>Edit Plan</Text>
+        </TouchableOpacity>
       </Card>
 
       {Object.entries(roomsByFloor)
@@ -125,6 +135,22 @@ const styles = StyleSheet.create({
   info: {
     fontSize: 14,
     color: colors.textSecondary,
+  },
+  editButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 12,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      backgroundColor: colors.backgroundSecondary,
+      borderRadius: 8,
+      alignSelf: 'flex-start',
+  },
+  editButtonText: {
+      marginLeft: 8,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.accentBlue,
   },
   floorCard: {
     marginBottom: 16,

@@ -21,11 +21,28 @@ export interface ChatMessage {
 }
 
 // House Plan Types
+export interface Door {
+  id: string;
+  x: number;
+  y: number;
+  rotation: number; // 0, 90, 180, 270
+  width: number;
+  type: 'standard' | 'sliding' | 'double';
+  floor: number;
+}
+
 export interface RoomZone {
   id: string;
   name: string;
   floor: number;
   estimatedAreaM2?: number;
+  // Visual Layout
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  color?: string;
+  wallMaterial?: 'brick' | 'concrete' | 'drywall' | 'glass';
 }
 
 export interface ConstructionDetails {
@@ -39,8 +56,10 @@ export interface HousePlan {
   addressLabel: string;
   floors: number;
   rooms: RoomZone[];
+  doors?: Door[];
   constructionDetails?: ConstructionDetails;
-  floorplanUrl?: string;
+  floorplanUrl?: any;
+  calixRouterSerialNumber?: string;
   createdAt: string;
 }
 
@@ -114,6 +133,9 @@ export interface HomeDevice {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  // Visual Position
+  x?: number;
+  y?: number;
 }
 
 

@@ -43,8 +43,8 @@ export const PostcodeScreen: React.FC = () => {
       return;
     }
 
-    // MVP Restriction: East Hampshire only (GU30-35, PO8-9)
-    const ehRegex = /^(GU3[0-5]|PO[89])\s.*$/;
+    // MVP Restriction: East Hampshire only (GU30-35, PO8-9) and Grayshott/Hindhead (GU26)
+    const ehRegex = /^(GU3[0-5]|PO[89]|GU26)\s.*$/;
     if (!ehRegex.test(formattedPostcode)) {
       Alert.alert(
         'Coming Soon',

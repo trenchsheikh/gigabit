@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
+    View,
+    Text,
+    StyleSheet,
+    Modal,
+    TextInput,
+    TouchableOpacity,
+    ScrollView,
+    Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,6 +22,8 @@ interface DeviceIdentificationModalProps {
   onDelete?: (deviceId: string) => void;
   selectedHousePlan?: { rooms: Array<{ id: string; name: string }> } | null;
 }
+
+import { fetchDevices, DeviceSummary } from '../services/api/devices';
 
 const DEVICE_TYPES: { value: DeviceType; label: string; icon: string }[] = [
   { value: 'router', label: 'Router', icon: 'router' },
@@ -44,21 +46,62 @@ export const DeviceIdentificationModal: React.FC<DeviceIdentificationModalProps>
   selectedHousePlan,
 }) => {
   const insets = useSafeAreaInsets();
-  const { devices, deleteDevice } = useAppStore();
+  const { devices, deleteDevice, routerNumber } = useAppStore();
   const [deviceName, setDeviceName] = useState('');
   const [deviceType, setDeviceType] = useState<DeviceType>('other');
   const [selectedRoomId, setSelectedRoomId] = useState<string>('');
   const [macAddress, setMacAddress] = useState('');
   const [ipAddress, setIpAddress] = useState('');
   const [notes, setNotes] = useState('');
-  const [showExistingDevices, setShowExistingDevices] = useState(true);
+  const [showExistingDevices, setShowExistingDevices] = useState(false);
+  
+  // Router Devices State
+  const [routerDevices, setRouterDevices] = useState<DeviceSummary[]>([]);
+  const [loadingRouterDevices, setLoadingRouterDevices] = useState(false);
+  const [showRouterDevices, setShowRouterDevices] = useState(true);
 
   useEffect(() => {
     if (visible) {
-      // Load devices when modal opens
+      // Load existing saved devices
       useAppStore.getState().loadDevices();
+      
+      // Fetch devices from router
+      fetchRouterDevices();
     }
   }, [visible]);
+
+  const fetchRouterDevices = async () => {
+    try {
+      setLoadingRouterDevices(true);
+      
+      const data = await fetchDevices(routerNumber || undefined);
+      setRouterDevices(data);
+    } catch (err) {
+      console.error('Fetch error:', err);
+    } finally {
+      setLoadingRouterDevices(false);
+    }
+  };
+
+  const handleSelectRouterDevice = (device: DeviceSummary) => {
+    setDeviceName(device.name);
+    setMacAddress(device.id); // Assuming ID is MAC or similar
+    // Try to guess type based on name/model/manufacturer
+    const lowerName = (device.name + ' ' + (device.model || '') + ' ' + (device.manufacturer || '')).toLowerCase();
+    if (lowerName.includes('tv')) setDeviceType('smart-tv');
+    else if (lowerName.includes('phone') || lowerName.includes('iphone') || lowerName.includes('android')) setDeviceType('smartphone');
+    else if (lowerName.includes('laptop') || lowerName.includes('macbook')) setDeviceType('laptop');
+    else if (lowerName.includes('pad') || lowerName.includes('tablet')) setDeviceType('tablet');
+    else if (lowerName.includes('speaker') || lowerName.includes('alexa') || lowerName.includes('google home')) setDeviceType('smart-speaker');
+    else if (lowerName.includes('console') || lowerName.includes('xbox') || lowerName.includes('playstation') || lowerName.includes('nintendo')) setDeviceType('gaming-console');
+    else if (lowerName.includes('extender') || lowerName.includes('mesh')) setDeviceType('extender');
+    else setDeviceType('other');
+
+    setNotes(`Connected via ${device.connectionType}. Manufacturer: ${device.manufacturer || 'Unknown'}. Model: ${device.model || 'Unknown'}`);
+    
+    // Collapse the list after selection
+    setShowRouterDevices(false);
+  };
 
   const getDeviceTypeIcon = (type: DeviceType): string => {
     const deviceType = DEVICE_TYPES.find((dt) => dt.value === type);
@@ -145,73 +188,50 @@ export const DeviceIdentificationModal: React.FC<DeviceIdentificationModalProps>
           </View>
 
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            {/* Existing Devices Section */}
-            {devices.length > 0 && (
-              <View style={styles.field}>
-                <TouchableOpacity
-                  style={styles.sectionHeader}
-                  onPress={() => setShowExistingDevices(!showExistingDevices)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.sectionHeaderLeft}>
-                    <Text style={styles.label}>Your Devices ({devices.length})</Text>
-                  </View>
-                  <Ionicons
-                    name={showExistingDevices ? 'chevron-up' : 'chevron-down'}
-                    size={20}
-                    color={colors.textSecondary}
-                  />
-                </TouchableOpacity>
-                {showExistingDevices && (
-                  <View style={styles.devicesList}>
-                    {devices.map((device) => {
-                      const deviceTypeInfo = DEVICE_TYPES.find((dt) => dt.value === device.type);
-                      return (
-                        <View key={device.id} style={styles.deviceItem}>
-                          <View style={styles.deviceItemLeft}>
-                            <View style={styles.deviceIconContainer}>
-                              <Ionicons
-                                name={getDeviceTypeIcon(device.type) as any}
-                                size={20}
-                                color={colors.accentBlue}
-                              />
-                            </View>
-                            <View style={styles.deviceInfo}>
-                              <Text style={styles.deviceName}>{device.name}</Text>
-                              <View style={styles.deviceMeta}>
-                                <Text style={styles.deviceTypeLabel}>
-                                  {deviceTypeInfo?.label || device.type}
-                                </Text>
-                                {device.roomName && (
-                                  <>
-                                    <Text style={styles.deviceMetaSeparator}>•</Text>
-                                    <Text style={styles.deviceRoom}>{device.roomName}</Text>
-                                  </>
-                                )}
-                              </View>
-                              {(device.ipAddress || device.macAddress) && (
-                                <Text style={styles.deviceDetails}>
-                                  {device.ipAddress && `IP: ${device.ipAddress}`}
-                                  {device.ipAddress && device.macAddress && ' • '}
-                                  {device.macAddress && `MAC: ${device.macAddress}`}
-                                </Text>
-                              )}
-                            </View>
-                          </View>
-                          <TouchableOpacity
-                            style={styles.deleteDeviceButton}
-                            onPress={() => handleDeleteDevice(device)}
-                            activeOpacity={0.7}
-                          >
-                            <Ionicons name="trash-outline" size={18} color={colors.error} />
-                          </TouchableOpacity>
+            {/* Router Devices Selection */}
+            <View style={styles.section}>
+              <TouchableOpacity 
+                style={styles.sectionHeader} 
+                onPress={() => setShowRouterDevices(!showRouterDevices)}
+              >
+                <Text style={styles.sectionTitle}>Detected Devices ({routerDevices.length})</Text>
+                <Ionicons name={showRouterDevices ? "chevron-up" : "chevron-down"} size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              {showRouterDevices && (
+                <View style={styles.routerDevicesList}>
+                  {loadingRouterDevices ? (
+                    <Text style={styles.loadingText}>Scanning for devices...</Text>
+                  ) : routerDevices.length === 0 ? (
+                    <Text style={styles.emptyText}>No devices found on router.</Text>
+                  ) : (
+                    routerDevices.map((device) => (
+                      <TouchableOpacity
+                        key={device.id}
+                        style={styles.routerDeviceItem}
+                        onPress={() => handleSelectRouterDevice(device)}
+                      >
+                        <View style={styles.routerDeviceIcon}>
+                           <Ionicons name={device.connectionType === 'Ethernet' ? 'hardware-chip-outline' : 'wifi'} size={20} color={colors.accentBlue} />
                         </View>
-                      );
-                    })}
-                  </View>
-                )}
-              </View>
-            )}
+                        <View style={styles.routerDeviceInfo}>
+                          <Text style={styles.routerDeviceName}>{device.name}</Text>
+                          <Text style={styles.routerDeviceMeta}>
+                            {[device.manufacturer, device.model].filter(Boolean).join(' ')}
+                          </Text>
+                        </View>
+                        <Ionicons name="add-circle-outline" size={24} color={colors.accentBlue} />
+                      </TouchableOpacity>
+                    ))
+                  )}
+                </View>
+              )}
+            </View>
+
+            <View style={styles.divider} />
+
+            {/* Manual Entry Form */}
+            <Text style={styles.sectionTitle}>Device Details</Text>
 
             {/* Divider */}
             {devices.length > 0 && (
@@ -604,6 +624,59 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textSecondary,
     fontWeight: '600',
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginBottom: 12,
+  },
+  routerDevicesList: {
+    gap: 8,
+  },
+  routerDeviceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.cardBackground,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  routerDeviceIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  routerDeviceInfo: {
+    flex: 1,
+  },
+  routerDeviceName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  routerDeviceMeta: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  loadingText: {
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    padding: 10,
+  },
+  emptyText: {
+    color: colors.textSecondary,
+    textAlign: 'center',
+    padding: 10,
   },
 });
 

@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { getFloorplanForAddress } from './services/floorplanScraper';
+import devicesRouter from './routes/devices';
 
 dotenv.config();
 
@@ -11,6 +12,9 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Devices Endpoint
+app.use('/api/devices', devicesRouter);
 
 // Floorplan Scraper Endpoint
 app.post('/api/floorplan', async (req, res) => {

@@ -1,0 +1,1822 @@
+openapi: 3.0.1
+info:
+  version: '1.0'
+  title: Calix Cloud Service Insights API
+  description: >
+    <p><b>This API Product is designed to facilitate interactive user experiences between customer applications and Calix Service Cloud.</b></p>
+    <p><b>To ensure optimal performance, usage for mass reporting or data extraction purposes is prohibited.
+    Any unauthorized use, including but not limited to excessive data requests for non-interactive processes, will result in restricted access to Calix Cloud APIs.</b></p>
+    <p><code><strong>Product Required: Calix Cloud Service Insights</strong></code></p>
+servers:
+  - url: https://api.calix.ai/v1/csc/insights
+    description: production server
+paths:
+  /system:
+    get:
+      tags:
+        - Controlled device data
+      summary: Retrieve system data
+      parameters:
+        - in: header
+          name: X-Calix-ClientID
+          schema:
+            type: string
+            format: string
+          description: client-id
+          required: true
+          example: sample-client-id
+        - in: header
+          name: X-Calix-AccessToken
+          schema:
+            type: string
+            format: string
+          description: access-token
+          example: sample-access-token
+          required: true
+        - name: serialNumber
+          in: query
+          description: CXNK009B44B5  ~ system serial number
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CPEHealth'
+        '404':
+          description: No device found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoSystemFoundError'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/429Response'
+  /system/radio:
+    get:
+      tags:
+        - Radio
+      summary: Retrieve system radio
+      parameters:
+        - in: header
+          name: X-Calix-ClientID
+          schema:
+            type: string
+            format: string
+          description: client-id
+          required: true
+          example: sample-client-id
+        - in: header
+          name: X-Calix-AccessToken
+          schema:
+            type: string
+            format: string
+          description: access-token
+          example: sample-access-token
+          required: true
+        - name: serialNumber
+          in: query
+          description: serialNumber and subscriberId cannot be null at the same time.
+          schema:
+            type: string
+        - name: subscriberId
+          in: query
+          description: serialNumber and subscriberId cannot be null at the same time.
+          schema:
+            type: string
+        - name: radio
+          in: query
+          description: all means getting all of Radio2.4G,5G,6G information
+          required: true
+          schema:
+            type: string
+            enum:
+              - all
+              - 24G
+              - 5G
+              - 6G
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WifiRadioSummaries'
+        '404':
+          description: No device found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoSystemFoundError'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/429Response'
+    put:
+      tags:
+        - Radio
+      summary: >-
+        Set the Wifi radio summary for 24G,5G or 6G from a device by
+        serialNumber or subscriberId
+      parameters:
+        - in: header
+          name: X-Calix-ClientID
+          schema:
+            type: string
+            format: string
+          description: client-id
+          required: true
+          example: sample-client-id
+        - in: header
+          name: X-Calix-AccessToken
+          schema:
+            type: string
+            format: string
+          description: access-token
+          example: sample-access-token
+          required: true
+        - name: serialNumber
+          in: query
+          description: serialNumber and subscriberId cannot be null at the same time
+          schema:
+            type: string
+        - name: subscriberId
+          in: query
+          schema:
+            type: string
+        - name: radio
+          in: query
+          description: Radio type, 2.4G 5G or 6G
+          required: true
+          schema:
+            type: string
+            enum:
+              - 24G
+              - 5G
+              - 6G
+      requestBody:
+        description: >-
+          Wifi Radio summary for all channels.
+
+          DFS and MUMIMO can be modified  for 5G, PSCOnly and MUMIMO  can be
+          modified for 6G.
+
+          The values of Mode, Bandwidth and Channel are dependent. For example:
+
+          When Mode=n, the bandwidth value range is [20MHz "," 40MHz "], and
+          when Bandwidth=20MHz, the channel value range is
+          [36,40,44,48,52,56,60,64,100,104,108,112,132,136,149,153,157,167]
+
+          When Mode=ac, the value of Bandwidth is ["20MHz", "40MHz", "80MHz],
+          and when Bandwidth=40MHz, the value range of Channel is [36, 44, 52,
+          60,100,132,149,157]
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/24G'
+                - $ref: '#/components/schemas/5G'
+                - $ref: '#/components/schemas/6G'
+            examples:
+              24G:
+                $ref: '#/components/examples/24G'
+              5G:
+                $ref: '#/components/examples/5G'
+              6G:
+                $ref: '#/components/examples/6G'
+        required: true
+      responses:
+        '200':
+          description: Radio summary result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateSuccess'
+        '404':
+          description: No device found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoSystemFoundError'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/429Response'
+  /system/device-list:
+    get:
+      tags:
+        - Controlled device data
+      summary: Retrieve system device list
+      parameters:
+        - in: header
+          name: X-Calix-ClientID
+          schema:
+            type: string
+            format: string
+          description: client-id
+          required: true
+          example: sample-client-id
+        - in: header
+          name: X-Calix-AccessToken
+          schema:
+            type: string
+            format: string
+          description: access-token
+          example: sample-access-token
+          required: true
+        - name: serialNumber
+          in: query
+          description: CXNK009B44B5  ~ system serial number
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceObject'
+        '404':
+          description: No device found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoSystemFoundError'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/429Response'
+  /device/detail:
+    get:
+      tags:
+        - Controlled device data
+      summary: >-
+        get current data(phyrate rssi efficiencyScore wifiScore and the judgment
+        of legacy) for a device
+      parameters:
+        - in: header
+          name: X-Calix-ClientID
+          schema:
+            type: string
+            format: string
+          description: client-id
+          required: true
+          example: sample-client-id
+        - in: header
+          name: X-Calix-AccessToken
+          schema:
+            type: string
+            format: string
+          description: access-token
+          example: sample-access-token
+          required: true
+        - name: serialNumber
+          in: query
+          description: CXNK009B44B5  ~ system serial number
+          required: true
+          schema:
+            type: string
+        - name: deviceMac
+          in: query
+          description: d0:76:8f:dd:c0:2f  ~ device mac
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentPhyrateRssiEfficiencWithIssues'
+        '404':
+          description: No device found Or No deviceMac exist
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/NoDeviceFoundErrorOrNoStationMacFoundError
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/429Response'
+  /system/wifi/currentRadioAirTime:
+    get:
+      tags:
+        - Controlled device data
+      summary: Get  wifi-currentRadioAirTime result
+      parameters:
+        - in: header
+          name: X-Calix-ClientID
+          schema:
+            type: string
+            format: string
+          description: client-id
+          required: true
+          example: sample-client-id
+        - in: header
+          name: X-Calix-AccessToken
+          schema:
+            type: string
+            format: string
+          description: access-token
+          example: sample-access-token
+          required: true
+        - name: serialNumber
+          in: query
+          description: CXNK009B44B5  ~ system serial number
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RadioAirTime'
+        '404':
+          description: No device found
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/NoDeviceFoundErrorOrNoStationMacFoundError
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/429Response'
+  /system/data:
+    get:
+      tags:
+        - Service Insights
+      summary: Retrieve Issues, QoE, Wan Data and Device details
+      parameters:
+        - in: header
+          name: X-Calix-ClientID
+          schema:
+            type: string
+            format: string
+          description: client-id
+          required: true
+          example: sample-client-id
+        - in: header
+          name: X-Calix-AccessToken
+          schema:
+            type: string
+            format: string
+          description: access-token
+          example: sample-access-token
+          required: true
+        - name: subscriberId
+          in: query
+          description: serialNumber and subscriberId cannot be null at the same time.
+          schema:
+            type: string
+        - name: serialNumber
+          in: query
+          description: serialNumber and subscriberId cannot be null at the same time.
+          schema:
+            type: string
+        - name: timeZoneOffset
+          in: query
+          description: '8'
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: successful operation
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BasicData'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/429Response'
+components:
+  schemas:
+    pcalloutcome:
+      type: object
+      description: "Call outcome data"
+      required:
+        - SubscriberId
+        - DeviceId
+        - CallType
+        - Status
+        - RootCause
+        - SubRootCause
+        - Notes
+      properties:
+        SubscriberId:
+          type: string
+          description: "ID of the subscriber"
+          example: 12345
+        DeviceId:
+          type: string
+          description: "ID of the device"
+          example: CLXN123
+        CallType:
+          type: string
+          description: "Call type"
+          example: "InBound"
+        Status:
+          type: string
+          description: Status of the call outcome data
+          example: Resolved
+        RootCause:
+          type: string
+          description: Root cause of the ticket
+          example: "Wi-Fi, Hardware"
+        SubRootCause:
+          type: string
+          description: Sub root cause of the ticket
+          example: "Wi-Fi interference, Faulty Device"
+        Notes:
+          type: string
+          description: Description of the ticket
+          example: "Free text input"
+    24G:
+      type: object
+      properties:
+        radioEnabled:
+          type: boolean
+        mode:
+          type: string
+        bandwidth:
+          type: string
+        channel:
+          type: integer
+        autoChannelEnable:
+          type: boolean
+        powerLevel:
+          type: integer
+        multicastForwarding:
+          type: boolean
+        airtimeFairness:
+          type: boolean
+        frameBurst:
+          type: boolean
+    5G:
+      type: object
+      properties:
+        radioEnabled:
+          type: boolean
+        mode:
+          type: string
+        bandwidth:
+          type: string
+        channel:
+          type: integer
+        autoChannelEnable:
+          type: boolean
+        powerLevel:
+          type: integer
+        DFS:
+          type: boolean
+        MUMIMO:
+          type: boolean
+    6G:
+      type: object
+      properties:
+        radioEnabled:
+          type: boolean
+        mode:
+          type: string
+        bandwidth:
+          type: string
+        channel:
+          type: integer
+        sutoChannelEnable:
+          type: boolean
+        powerLevel:
+          type: integer
+        PSCOnly:
+          type: boolean
+    NoSystemFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - No system found with the given query filter!
+    429Response:
+      type: object
+      properties:
+        errorCode:
+          type: number
+          example: 429
+        errorMessage:
+          type: string
+          example: "Too Many Requests"
+    NoDeviceFoundErrorOrNoStationMacFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - No device found with the given query filter! or not exist error
+    DeviceObject:
+      type: object
+      properties:
+        isLegacy:
+          type: boolean
+        hostName:
+          type: string
+          example: android-Johnson
+        macAddress:
+          type: string
+          example: d0:ab:d5:e4:87:8e
+        ipAddress:
+          type: string
+          example: 192.168.1.11
+        connection:
+          type: string
+          example: 2.4GHz
+        accessPoint:
+          type: string
+          example: RG 844F
+        ssid:
+          type: string
+          example: my-wifi-ssid
+        mode:
+          type: string
+          example: 802.11n
+        wifiScore:
+          type: integer
+          example: 5
+        wifiSignalStrength:
+          type: number
+          example: -59.6
+        dsPacketDrops:
+          type: integer
+          example: 5
+        wifiSNR:
+          type: number
+        wifiAirtimeUsage:
+          type: number
+          example: 0
+        dsPhyRate:
+          type: number
+          example: 0
+        usPhyRate:
+          type: number
+          example: 0
+        dsRetxPackets:
+          type: number
+          example: 0
+        status:
+          type: string
+          example: online
+        addressSource:
+          type: string
+          example: DHCP
+        model:
+          type: string
+          example: Pixel
+        manufacturer:
+          type: string
+          example: Google
+        codeVersion:
+          type: string
+          example: android
+        leaseTimeExpiry:
+          type: number
+          example: 1607982909000
+        connectionType:
+          type: string
+          example: wifi
+        band:
+          type: number
+          format: float
+          enum:
+            - 2.4
+            - 5
+            - 6
+        channelNumber:
+          type: number
+          example: 36
+        e2ePhyRate:
+          type: number
+        rxBandwidthUsage:
+          type: number
+          example: 20
+        txBandwidthUsage:
+          type: number
+          example: 1
+        wifiExperienceScore:
+          type: number
+          example: 0.9
+        txBytes:
+          type: number
+          example: 33
+        rxBytes:
+          type: number
+          example: 11
+        accessPointSerialNumber:
+          type: string
+          example: fsan value of AP2
+        accessPointHostName:
+          type: string
+          example: hulk2's Router
+        clientType:
+          type: integer
+          example: 1
+        ethPort:
+          type: number
+          example: 1
+      description: Object Parameters
+    DeviceInfo:
+      type: object
+      properties:
+        _id:
+          type: string
+        opMode:
+          type: string
+        ipAddress:
+          type: string
+        modelName:
+          type: string
+        createTime:
+          type: string
+        macAddress:
+          type: string
+        subnetMask:
+          type: string
+        lastBootTime:
+          type: string
+        manufacturer:
+          type: string
+        productClass:
+          type: string
+        serialNumber:
+          type: string
+        dataModelName:
+          type: string
+        wanAccessType:
+          type: string
+        lastInformTime:
+          type: string
+        registrationId:
+          type: string
+        hardwareVersion:
+          type: string
+        manufacturerOUI:
+          type: string
+        secondIpAddress:
+          type: string
+        softwareVersion:
+          type: string
+        secondMacAddress:
+          type: string
+        periodicInformInterval:
+          type: integer
+        wanSecDCSConnectionPath:
+          type: string
+        hardwareSerialNumber:
+          type: string
+        pppUsername:
+          type: string
+        periodicInformEnable:
+          type: boolean
+        uptime:
+          type: integer
+      description: Device information
+      example:
+        _id: 142551-EC4F82-CXNK27C00088
+        opMode: RG
+        ipAddress: 10.245.247.63
+        modelName: 84.4
+        createTime: 2020-11-23T11:44:58.037Z
+        macAddress: 08:a0:27:c0:00:88
+        subnetMask: 39.192.0.0
+        lastBootTime: 2020-11-23T11:04:45.873Z
+        manufacturer: Calix
+        productClass: ENT
+        serialNumber: CXNK27C00088
+        dataModelName: tr098
+        wanAccessType: GPON
+        lastInformTime: 2020-12-01T04:11:31.888Z
+        registrationId: JackSim
+        hardwareVersion: SXA-CC CPE Simulator v0.0.1
+        manufacturerOUI: EC4F82
+        secondIpAddress: 10.201.8.10
+        softwareVersion: 12.2.2.1
+        secondMacAddress: 00:06:31:b4:07:13
+        periodicInformInterval: 86400
+        hardwareSerialNumber: '123'
+        pppUsername: '123'
+        periodicInformEnable: true
+        uptime: 15233
+    WifiRadio24GSummary:
+      type: object
+      properties:
+        radioEnabled:
+          type: boolean
+        mode:
+          type: string
+        bandwidth:
+          type: string
+        channel:
+          type: integer
+        autoChannelEnable:
+          type: boolean
+        powerLevel:
+          type: integer
+        noiseLevel:
+          type: integer
+        packetsSent:
+          type: integer
+        packetsReceived:
+          type: integer
+        packetsReTransmittedDownstream:
+          type: integer
+        packetsDroppedDownstream:
+          type: integer
+      description: Wifi Radio summary
+    WifiRadio5GSummary:
+      type: object
+      properties:
+        radioEnabled:
+          type: boolean
+        mode:
+          type: string
+        bandwidth:
+          type: string
+        channel:
+          type: integer
+        autoChannelEnable:
+          type: boolean
+        powerLevel:
+          type: integer
+        DFS:
+          type: boolean
+        noiseLevel:
+          type: integer
+        packetsSent:
+          type: integer
+        packetsReceived:
+          type: integer
+        packetsReTransmittedDownstream:
+          type: integer
+        packetsDroppedDownstream:
+          type: integer
+        mumimo:
+          type: boolean
+        regulatoryDomain:
+          type: string
+      description: Wifi Radio summary
+    WifiRadio6GSummary:
+      type: object
+      properties:
+        radioEnabled:
+          type: boolean
+        mode:
+          type: string
+        bandwidth:
+          type: string
+        channel:
+          type: integer
+        autoChannelEnable:
+          type: boolean
+        powerLevel:
+          type: integer
+        PSCOnly:
+          type: boolean
+        noiseLevel:
+          type: integer
+        packetsSent:
+          type: integer
+        packetsReceived:
+          type: integer
+        packetsReTransmittedDownstream:
+          type: integer
+        packetsDroppedDownstream:
+          type: integer
+        MUMIMO:
+          type: boolean
+      description: Wifi Radio summary
+    WifiRadioSummaries:
+      type: object
+      properties:
+        24G:
+          $ref: '#/components/schemas/WifiRadio24GSummary'
+        5G:
+          $ref: '#/components/schemas/WifiRadio5GSummary'
+        6G:
+          $ref: '#/components/schemas/WifiRadio6GSummary'
+      description: Wifi Radio summary for all channels
+    CPEHealth:
+      type: object
+      properties:
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        issues:
+          $ref: '#/components/schemas/AllIssues1'
+    IssueObject1:
+      type: object
+      properties:
+        code:
+          type: string
+        serialNumber:
+          type: string
+        source:
+          type: string
+        sourceId:
+          type: string
+        type:
+          type: string
+        serverity:
+          type: string
+        reason:
+          type: string
+    AllIssues1:
+      type: array
+      example:
+        - code: STALE_SOFTWARE_VERSION
+          serialNumber: CXNK0064E77F
+          source: CXNK0064E77F
+          sourceId: CXNK0064E77F
+          type: ROUTER
+          severity: 1
+          reason: The software is more than 2 images behind the latest image
+        - code: STALE_SOFTWARE_VERSION
+          serialNumber: CXNK001D8F47
+          source: CXNK001D8F47
+          sourceId: CXNK001D8F47
+          type: ROUTER
+          severity: 1
+          reason: The software is more than 2 images behind the latest image
+        - code: GATEWAY_FAILED
+          serialNumber: CXNK0064E77F
+          source: CXNK0064E77F
+          sourceId: CXNK0064E77F
+          type: SERVICE
+          severity: 0
+          reason: The WAN link is down, no internet service detected
+        - code: ONT_OFFLINE
+          serialNumber: CXNK0064E77F
+          source: CXNK0064E77F
+          sourceId: CXNK0064E77F
+          type: ROUTER
+          severity: 0
+          reason: The ONT is not reachable
+      items:
+        $ref: '#/components/schemas/IssueObject1'
+    CurrentPhyrateRssiEfficiencWithIssues:
+      type: object
+      properties:
+        serialNumber:
+          type: string
+          example: CXNK005D60B8
+        deviceMac:
+          type: string
+          example: 48:77:46:85:bc:8a
+        details:
+          $ref: '#/components/schemas/Details'
+        isLegacy:
+          type: boolean
+        issues:
+          $ref: '#/components/schemas/ClientIssueObject'
+    Details:
+      type: array
+      items:
+        $ref: '#/components/schemas/Detail'
+    Detail:
+      type: object
+      properties:
+        hostName:
+          type: string
+          example: android-Johnson
+        macAddress:
+          type: string
+          example: d0:ab:d5:e4:87:8e
+        ipAddress:
+          type: string
+          example: 192.168.1.11
+        connection:
+          type: string
+          example: 2.4GHz
+        accessPoint:
+          type: string
+          example: RG 844F
+        ssid:
+          type: string
+          example: my-wifi-ssid
+        mode:
+          type: string
+          example: 802.11n
+        wifiScore:
+          type: integer
+          example: 5
+        wifiSignalStrength:
+          type: number
+          example: -59.6
+        dsPacketDrops:
+          type: integer
+          example: 5
+        wifiSNR:
+          type: number
+        wifiAirtimeUsage:
+          type: number
+          example: 0
+        dsPhyRate:
+          type: number
+          example: 0
+        usPhyRate:
+          type: number
+          example: 0
+        dsRetxPackets:
+          type: number
+          example: 0
+        status:
+          type: string
+          example: online
+        addressSource:
+          type: string
+          example: DHCP
+        model:
+          type: string
+          example: Pixel
+        manufacturer:
+          type: string
+          example: Google
+        codeVersion:
+          type: string
+          example: android
+        leaseTimeExpiry:
+          type: number
+          example: 1607982909000
+        connectionType:
+          type: string
+          example: wifi
+        band:
+          type: number
+          format: float
+          enum:
+            - 2.4
+            - 5
+            - 6
+        channelNumber:
+          type: number
+          example: 36
+        e2ePhyRate:
+          type: number
+        rxBandwidthUsage:
+          type: number
+          example: 20
+        txBandwidthUsage:
+          type: number
+          example: 1
+        wifiExperienceScore:
+          type: number
+          example: 0.9
+        txBytes:
+          type: number
+          example: 33
+        rxBytes:
+          type: number
+          example: 11
+        accessPointSerialNumber:
+          type: string
+          example: fsan value of AP2
+        accessPointHostName:
+          type: string
+          example: hulk2's Router
+        clientType:
+          type: integer
+          example: 1
+        ethPort:
+          type: number
+          example: 1
+      description: Object Parameters
+    ClientIssueObject:
+      type: object
+      properties:
+        code:
+          type: string
+        serialNumber:
+          type: string
+        source:
+          type: string
+        sourceId:
+          type: string
+        type:
+          type: string
+        serverity:
+          type: string
+        reason:
+          type: string
+        recommendation:
+          type: string
+      example:
+        code: CLIENT_DEVICE_LEGACY_DEVICE_DETECTED
+        serialNumber: CXNK00FEEEA5
+        sourceId: 94:10:3e:4a:2c:f5
+        source: Hallway
+        type: DEVICE
+        severity: 1
+        reason: Legacy device
+        recommendation: >-
+          This device is running in older Wi-Fi mode. This may impact the Wi-Fi
+          network performance for other devices. Suggestion is to evaluate the
+          device type and have conversation with subscriber about what the
+          device is doing.
+    IssueObject:
+      type: object
+      properties:
+        code:
+          type: string
+        serialNumber:
+          type: string
+        source:
+          type: string
+        sourceId:
+          type: string
+        type:
+          type: string
+        serverity:
+          type: string
+        reason:
+          type: string
+    RadioAirTime:
+      type: object
+      properties:
+        band24gRadioAirtime:
+          $ref: '#/components/schemas/Result'
+        band5gRadioAirtime:
+          $ref: '#/components/schemas/Result'
+        band6gRadioAirtime:
+          $ref: '#/components/schemas/Result'
+    Result:
+      type: object
+      properties:
+        channelUtilization:
+          type: number
+          example: 162
+        channelInterferenceTime:
+          type: number
+          example: 372
+    UpdateSuccess:
+      type: object
+      properties:
+        radio:
+          type: string
+        update:
+          type: string
+        provisioningRecordUpdate:
+          type: string
+      example:
+        radio: 5G
+        update: success
+        provisioningRecordUpdate: success
+    AP:
+      type: object
+      properties:
+        sn:
+          type: string
+        mac:
+          type: string
+        name:
+          type: string
+          description: showed as what's modified in CommandIQ
+        version:
+          type: string
+        ip:
+          type: string
+        hostname:
+          type: string
+        failed-clients:
+          type: number
+          format: int32
+        passed-clients:
+          type: number
+          format: int32
+        ap-online:
+          type: string
+        ap-issue-list:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueObject'
+        int-type:
+          type: string
+        eth-port:
+          type: number
+          format: int32
+        ssid:
+          type: string
+        backhaul:
+          $ref: '#/components/schemas/Backhaul'
+        aps:
+          type: array
+          items:
+            $ref: '#/components/schemas/AP'
+        radio-info:
+          type: array
+          items:
+            $ref: '#/components/schemas/RadioInfo'
+        clients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client'
+        radio-airtime:
+          type: array
+          items:
+            $ref: '#/components/schemas/RadioAirTime'
+    Backhaul:
+      type: object
+      properties:
+        channel:
+          type: string
+        rx-phy-rate:
+          type: string
+        tx-phy-rate:
+          type: string
+        backhaul-color:
+          type: string
+        backhaul-tech-note:
+          type: string
+        backhaul-issue-list:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueObject'
+        rssi:
+          type: string
+        rtx-packets:
+          type: string
+        transmit-drops:
+          type: string
+        RxTxRecord:
+          type: array
+          items:
+            type: object
+            properties:
+              time:
+                type: integer
+              rxBytes:
+                type: integer
+              txBytes:
+                type: integer
+        ap-hostname:
+          type: string
+        Avg-Wifi-score:
+          type: integer
+        SNR:
+          type: number
+        Airtime-usage:
+          type: number
+        MACAddress:
+          type: string
+        Connection-type:
+          type: string
+        SSID:
+          type: string
+        Mode:
+          type: string
+        AccessPoint:
+          type: string
+        Band:
+          type: number
+          format: float
+          enum:
+            - 2.4
+            - 5
+            - 6
+        satPlacementRating:
+          type: number
+        client-efficiency-score:
+          type: number
+    RadioInfo:
+      type: object
+      properties:
+        freq-band:
+          type: number
+          format: float
+          enum:
+            - 2.4
+            - 5
+            - 6
+        tx-power:
+          type: number
+          format: int32
+        channel-width:
+          type: number
+          format: int32
+        channel:
+          type: number
+          format: int32
+        ssid:
+          type: string
+    Client:
+      type: object
+      properties:
+        mac:
+          type: string
+        intf-type:
+          type: string
+        intf-mac:
+          type: string
+        ip-address:
+          type: string
+        hostname:
+          type: string
+        client-efficiency-score:
+          type: number
+          format: int32
+        client-color:
+          type: string
+        client-note:
+          type: string
+        client-issue-list:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueObject'
+        signal-strength:
+          type: number
+          format: float
+        client-distance:
+          type: string
+        DS-phy-rate:
+          type: number
+          format: int32
+        US-phy-rate:
+          type: number
+          format: int32
+        DS-packet-drops:
+          type: number
+          format: int32
+        client-type:
+          type: string
+        fingerprint-model:
+          type: string
+        fingerpint-vendor:
+          type: string
+        wifi-mode:
+          type: string
+        freq-band:
+          type: number
+          format: float
+          enum:
+            - 2.4
+            - 5
+            - 6
+        legacy-device-test-result:
+          type: string
+        signal-strength-test-result:
+          type: string
+        phy-rate-test-result:
+          type: string
+        access-point-hostname:
+          type: string
+        signal-bars:
+          type: number
+          format: int32
+        channel-interference:
+          type: number
+          format: int32
+        ssid:
+          type: string
+        ap-hostname:
+          type: string
+        Connection:
+          type: string
+        AccessPoint:
+          type: string
+        SNR:
+          type: number
+          format: int32
+        Airtime-usage:
+          type: number
+          format: int32
+        DS-retx-packets:
+          type: number
+          format: int32
+        Status:
+          type: string
+        Address-source:
+          type: string
+        Code-version:
+          type: string
+        Lease-time-expiry:
+          type: number
+          format: int32
+        Channel-number:
+          type: number
+          format: int32
+        E2E-phy-rate:
+          type: number
+          format: int32
+        RX-bandwidth-usage:
+          type: number
+          format: int32
+        TX-bandwidth-usage:
+          type: number
+          format: int32
+        TX-bytes:
+          type: number
+          format: int32
+        RX-bytes:
+          type: number
+          format: int32
+        eth-port:
+          type: number
+          format: int32
+          example: 1
+    BasicData:
+      type: object
+      properties:
+        allIssues:
+          $ref: '#/components/schemas/AllIssues'
+        wanInfo:
+          $ref: '#/components/schemas/WanInfo'
+        qoeInfo:
+          $ref: '#/components/schemas/QoeSummary'
+        details:
+          $ref: '#/components/schemas/Details'
+    QoeSummaryRawDataObject:
+      type: object
+      properties:
+        date:
+          type: string
+        time:
+          type: string
+        dl_created:
+          type: integer
+        upSpeed:
+          type: string
+        downSpeed:
+          type: string
+        latency:
+          type: integer
+        homeScore:
+          type: integer
+        status:
+          type: string
+        wanDownTime:
+          type: integer
+        wanService:
+          type: string
+        qoeScore:
+          type: integer
+        wanContinuity:
+          type: string
+        qoeHelpingText:
+          type: array
+          items:
+            type: string
+        qoeHelpingCode:
+          type: array
+          items:
+            type: string
+        wanserviceHelpingText:
+          type: array
+          items:
+            type: string
+        wanserviceHelpingCode:
+          type: array
+          items:
+            type: string
+      example:
+        date: "20211028"
+        time: "1315"
+        dl_created: 1633939200
+        homeScore: 1
+        status: Known
+        wanDownTime: 300
+        upSpeed: GOOD
+        downSpeed: GOOD
+        latency: 120
+        wanService: OK
+        qoeScore: 3
+        wanContinuity: UP
+        qoeHelpingText:
+        - Observed Poor Client(s) Efficiency
+        - Wan Continuity not available
+        qoeHelpingCode:
+        - QOE_HELP_0005
+        - QOE_HELP_0008
+        wanserviceHelpingText:
+        - QOE_HELP_0008
+        wanserviceHelpingCode:
+        - Wan Continuity not available
+    QoeSummaryDailyDataObject:
+      type: object
+      properties:
+        fsan_sn:
+          type: string
+        router_mac:
+          type: string
+        date:
+          type: string
+        wanContinuity:
+          type: string
+        homeScore:
+          type: string
+        wanService:
+          type: string
+        qoeScore:
+          type: string
+        wanDownTime:
+          type: integer
+        failed15MinutesBinCount:
+          type: integer
+        qoeHelpingText:
+          type: array
+          items:
+            type: string
+        qoeHelpingCode:
+          type: array
+          items:
+            type: string
+        wanserviceHelpingText:
+          type: array
+          items:
+            type: string
+        wanserviceHelpingCode:
+          type: array
+          items:
+            type: string
+      example:
+        fsan_sn: ""
+        router_mac: ""
+        date: "20191028"
+        wanContinuity: UP
+        homeScore: 40
+        wanService: OK
+        qoeScore: 3
+        wanDownTime: 300
+        failed15MinutesBinCount: 2
+        qoeHelpingText:
+        - Observed Poor Client(s) Efficiency
+        - Wan Continuity not available
+        qoeHelpingCode:
+        - QOE_HELP_0005
+        - QOE_HELP_0008
+        wanserviceHelpingText:
+        - QOE_HELP_0008
+        wanserviceHelpingCode:
+        - Wan Continuity not available
+    QoeSummary:
+      type: object
+      properties:
+        fsan_sn:
+          type: string
+        router_mac:
+          type: string
+        rawData:
+          type: array
+          items:
+            $ref: '#/components/schemas/QoeSummaryRawDataObject'
+        dailyData:
+          type: array
+          items:
+            $ref: '#/components/schemas/QoeSummaryDailyDataObject'
+        avgHomeScore:
+          type: integer
+          example: 52
+    WanInfo:
+      type: array
+      example:
+        - path: >-
+            InternetGatewayDevice.WANDevice.3.WANConnectionDevice.1.WANIPConnection.2
+          bIsData: true
+          bIsVoice: false
+          bIsVideo: false
+          Name: Management and Data Service
+          Enable: 'true'
+          Uptime: '2438'
+          ConnectionStatus: Connected
+          MACAddress: 00:06:31:ed:e7:f0
+          Vlan: untagged
+          BytesReceived: '410648'
+          BytesSent: '2388741'
+          PacketsReceived: '4345'
+          PacketsSent: '2784'
+          AddressingType: DHCP
+          ConnectionType: IP_Routed
+          DefaultGateway: 10.205.252.1
+          SubnetMask: 255.255.252.0
+          DNSServers: 172.21.50.130,172.21.50.131
+          ExternalIPAddress: 10.205.252.14
+          UpstreamRate: '100'
+          DownstreamRate: '100'
+      items:
+        $ref: '#/components/schemas/WanInfoData'
+    WanInfoData:
+      type: object
+      properties:
+        path:
+          type: string
+        bIsData:
+          type: boolean
+        bIsVoice:
+          type: boolean
+        bIsVideo:
+          type: boolean
+        Name:
+          type: string
+        Enable:
+          type: boolean
+        Uptime:
+          type: number
+          format: int64
+        ConnectionStatus:
+          type: string
+        IPv6ConnStatus:
+          type: string
+        MACAddress:
+          type: string
+        VlanPriority:
+          type: string
+        VlanId:
+          type: string
+        Vlan:
+          type: string
+        BytesReceived:
+          type: string
+        BytesSent:
+          type: string
+        PacketsReceived:
+          type: string
+        PacketsSent:
+          type: string
+        AddressingType:
+          type: string
+        Username:
+          type: string
+        ConnectionType:
+          type: string
+        IPv6ConnType:
+          type: string
+        DefaultGateway:
+          type: string
+        SubnetMask:
+          type: string
+        RemoteIPAddress:
+          type: string
+        DNSServers:
+          type: string
+        ExternalIPAddress:
+          type: string
+        DefaultIPv6Gateway:
+          type: string
+        IPv6DNSServers:
+          type: string
+        ExternalIPv6Address:
+          type: string
+        IANA:
+          type: string
+        GRP:
+          type: string
+          format: date-time
+        IPv6SitePrefixVltime:
+          type: string
+          format: date-time
+        IPv6SitePrefixPltime:
+          type: string
+          format: date-time
+        UpstreamRate:
+          type: string
+        DownstreamRate:
+          type: string
+    AllIssues:
+      type: array
+      example:
+      - code: WIFI_INTERFERENCE_HIGH_24G
+        subscriberId: f8309955-57c5-4a30-bd73-820619fbf55d
+        serialNumber: CXNK00587F86
+        source: CXNK00587F86
+        sourceId: CXNK00587F86
+        type: WIFI
+        severity: 1
+        reason: 2.4 GHz Wi-Fi channel interference is above recommended thresholds.
+          The system is attempting to find a better channel
+      - code: WIFI_INTERFERENCE_HIGH_5G
+        subscriberId: f8309955-57c5-4a30-bd73-820619fbf55d
+        serialNumber: CXNK00587F86
+        source: CXNK00587F86
+        sourceId: CXNK00587F86
+        type: WIFI
+        severity: 1
+        reason: 5 GHz Wi-Fi channel interference is above recommended thresholds.
+          The system is attempting to find a better channel
+      - code: WIFI_INTERFERENCE_HIGH_24G
+        subscriberId: f8309955-57c5-4a30-bd73-820619fbf55d
+        serialNumber: CXNK0088AD97
+        source: CXNK0088AD97
+        sourceId: CXNK0088AD97
+        type: WIFI
+        severity: 1
+        reason: 2.4 GHz Wi-Fi channel interference is above recommended thresholds.
+          The system is attempting to find a better channel
+      - code: WIFI_INTERFERENCE_HIGH_5G
+        subscriberId: f8309955-57c5-4a30-bd73-820619fbf55d
+        serialNumber: CXNK0088AD97
+        source: CXNK0088AD97
+        sourceId: CXNK0088AD97
+        type: WIFI
+        severity: 1
+        reason: 5 GHz Wi-Fi channel interference is above recommended thresholds.
+          The system is attempting to find a better channel
+      items:
+        $ref: '#/components/schemas/IssueObject'
+  responses:
+    respcalloutcomes:
+      description: "Response of call outcome data for partners"
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/pcalloutcome'
+    respcalloutcome:
+      description: "Response of call outcome data for partners"
+      content:
+        application/json:
+          schema:
+            type: object
+            $ref: '#/components/schemas/pcalloutcome'
+    400_response:
+      description: "Bad request"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: string
+                example: 400
+              message:
+                type: string
+                example: Bad request
+    500_response:
+      description: "Internal Server Error"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: string
+                example: 500
+              message:
+                type: string
+                example: Bad request
+  parameters:
+    serialNumber:
+      name: serialNumber
+      in: query
+      description: CXNK009B44B5  ~ system serial number
+      required: true
+      schema:
+        type: string
+    deviceMac:
+      name: deviceMac
+      in: query
+      description: d0:76:8f:dd:c0:2f  ~ device mac
+      required: true
+      schema:
+        type: string
+    router_mac:
+      name: stationMac
+      in: query
+      description: 1e:c2:4e:01:b6:6f
+      required: true
+      schema:
+        type: string
+    subscriberId:
+      name: subscriberId
+      in: query
+      description: c6defd06-f5a5-4005-955a-c131115a48f0
+      required: true
+      schema:
+        type: string
+    period:
+      name: period
+      in: query
+      description: >-
+        (this parameter is about  getting device-efficiency-score) 1. Last one
+        week
+
+        2. Last 24 hours
+
+        3. Last 3 hours
+
+        4. Any hours within last week
+
+        5. Last 15 minutes
+
+        6. Any 15 minutes with in last day
+      required: true
+      schema:
+        type: integer
+        enum:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+    startTime:
+      name: startTime
+      in: query
+      description: 2021-11-22T15:45:00  ~get startTime of device-efficiency-score
+      example: '2021-11-22T15:45:00'
+      required: true
+      schema:
+        type: string
+    endTime:
+      name: endTime
+      in: query
+      description: 2021-11-22T16:01:00  ~get endTime of  device-efficiency-score
+      example: '2021-11-22T16:01:00'
+      required: true
+      schema:
+        type: string
+    timeZoneOffset:
+      name: timeZoneOffset
+      in: query
+      description: '8'
+      required: true
+      schema:
+        type: number
+        format: float
+    lastndays:
+      name: lastndays
+      in: query
+      description: '1    ~get lastndays of phyAndRssi '
+      required: true
+      schema:
+        type: number
+        format: int64
+  examples:
+    24G:
+      value:
+        radioEnabled: 'true'
+        mode: 'n'
+        bandwidth: 40MHz
+        channel: '10'
+    5G:
+      value:
+        radioEnabled: 'true'
+        mode: 'n'
+        bandwidth: 80MHz
+        channel: '100'
+        DFS: false
+        MUMIMO: false
+    6G:
+      value:
+        radioEnabled: 'true'
+        mode: ax
+        bandwidth: 160MHz
+        channel: '133'
+        PSCOnly: true
+        MUMIMO: true
+    BackupBySubscriberIdRequest:
+      value:
+        subscriberId: ab1f2dfd-10c1-4df3-963a-d2e251dc870f
+        userName: jshi@calix.com
+        description: local_test2
+    BackupBySNRequest:
+      value:
+        serialNumber: CXNK005A9668
+        userName: jshi@calix.com
+        description: local_test2
+    RestoreBySubscriberIdRequest:
+      value:
+        subscriberId: ab1f2dfd-10c1-4df3-963a-d2e251dc870f
+        fileId: 5fc5d262e4b0ea4c49d065ed
+    RestoreBySNRequest:
+      value:
+        serialNumber: CXNK005A9668
+        fileId: 5fc5d262e4b0ea4c49d065ed
+    FirmwareUpgradeBySubscriberIdRequest:
+      value:
+        subscriberId: ab1f2dfd-10c1-4df3-963a-d2e251dc870f
+        internalFileId: 63e1f9d68f083b123d8164bb
+    FirmwareUpgradeBySNRequest:
+      value:
+        serialNumber: CXNK005A9668
+        internalFileId: 63e1f9d68f083b123d8164bb

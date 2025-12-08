@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  FlatList,
-  PanResponder,
-  Animated,
-  Easing,
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Modal,
+    FlatList,
+    PanResponder,
+    Animated,
+    Easing,
+    ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +17,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../store/useAppStore';
 import { colors } from '../theme/colors';
-import type { RootStackParamList } from '../navigation/types';
+import { MyDevices } from '../components/MyDevices';
+import type { RootStackParamList, MainTabParamList } from '../navigation/types';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
 type DashboardNavigationProp = StackNavigationProp<RootStackParamList>;
@@ -27,7 +29,7 @@ interface QuickAction {
   description: string;
   icon: string;
   color: string;
-  route: keyof RootStackParamList;
+  route: keyof RootStackParamList | keyof MainTabParamList;
   params?: any;
 }
 
@@ -300,15 +302,13 @@ export const DashboardScreen: React.FC = () => {
       </View>
 
       {/* Main Content */}
-      <View style={styles.content}>
-        {/* App Introduction */}
-        <View style={styles.introSection}>
-          <Text style={styles.introTitle}>Smart WiFi Management</Text>
-          <Text style={styles.introDescription}>
-            Test network speeds, scan WiFi coverage with AR heatmaps, chat with AI assistants, 
-            and monitor security threats all in one intelligent platform.
-          </Text>
-        </View>
+      <ScrollView 
+        style={styles.content} 
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* My Devices Section */}
+        <MyDevices />
 
         {/* Quick Actions */}
       <View style={styles.quickActionsSection}>
@@ -358,9 +358,9 @@ export const DashboardScreen: React.FC = () => {
               </TouchableOpacity>
             );
           })}
-              </View>
             </View>
       </View>
+      </ScrollView>
 
       {/* Notifications Modal */}
       <Modal
