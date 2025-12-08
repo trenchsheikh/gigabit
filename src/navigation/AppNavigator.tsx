@@ -10,7 +10,7 @@ import type { RootStackParamList, MainTabParamList } from './types';
 
 // Screens
 import { SignInScreen } from '../screens/SignInScreen';
-import { PostcodeScreen } from '../screens/PostcodeScreen';
+import { AddressSelectionScreen } from '../screens/AddressSelectionScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { AgentsScreen } from '../screens/AgentsScreen';
@@ -27,6 +27,7 @@ import { AgentDetailScreen } from '../screens/AgentDetailScreen';
 import { FloorPlanSearchScreen } from '../screens/FloorPlanSearchScreen';
 import { FloorPlanConfirmScreen } from '../screens/FloorPlanConfirmScreen';
 import { FloorPlanManualInputScreen } from '../screens/FloorPlanManualInputScreen';
+import { FloorPlanCreatorScreen } from '../screens/FloorPlanCreatorScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -147,11 +148,51 @@ export const AppNavigator: React.FC = () => {
         {!isAuthenticated ? (
           <Stack.Screen name="SignIn" component={SignInScreen} />
         ) : !userPostcode ? (
-          <Stack.Screen
-            name="AddressEntry"
-            component={FloorPlanSearchScreen}
-            options={{ headerShown: false }}
-          />
+          <>
+            <Stack.Screen
+              name="AddressSelection"
+              component={AddressSelectionScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="FloorPlanSearch"
+              component={FloorPlanSearchScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="FloorPlanConfirm"
+              component={FloorPlanConfirmScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="FloorPlanManualInput"
+              component={FloorPlanManualInputScreen}
+              options={{
+                headerShown: true,
+                title: 'Add Floor Plan',
+                headerStyle: {
+                  backgroundColor: colors.cardBackground,
+                  elevation: 0,
+                  shadowOpacity: 0.3,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.border,
+                },
+                headerTitleStyle: {
+                  fontSize: 18,
+                  fontWeight: '700',
+                  color: colors.textPrimary,
+                },
+                headerTintColor: colors.accentBlue,
+              }}
+            />
+            <Stack.Screen
+              name="FloorPlanCreator"
+              component={FloorPlanCreatorScreen}
+              options={{
+                headerShown: false,
+              }}
+            />
+          </>
         ) : !userSettings.hasCompletedOnboarding ? (
           <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         ) : (
@@ -186,6 +227,13 @@ export const AppNavigator: React.FC = () => {
                   color: colors.textPrimary,
                 },
                 headerTintColor: colors.accentBlue,
+              }}
+            />
+            <Stack.Screen
+              name="FloorPlanCreator"
+              component={FloorPlanCreatorScreen}
+              options={{
+                headerShown: false,
               }}
             />
             <Stack.Screen

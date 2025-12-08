@@ -19,6 +19,7 @@ interface AppState {
   userSettings: UserSettings;
   networkSummary: NetworkSummary;
   devices: HomeDevice[];
+  routerNumber: string | null;
 
   // Actions
   signIn: (username: string) => Promise<void>;
@@ -43,6 +44,7 @@ interface AppState {
   updateDevice: (device: HomeDevice) => Promise<void>;
   deleteDevice: (deviceId: string) => Promise<void>;
   loadDevices: () => Promise<void>;
+  setRouterNumber: (routerNumber: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -60,6 +62,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   userSettings: { hasCompletedOnboarding: false },
   networkSummary: {},
   devices: [],
+  routerNumber: null,
 
   signIn: async (username: string) => {
     await storageService.saveAuthData({ username, isAuthenticated: true });
@@ -67,12 +70,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   signOut: async () => {
-    await storageService.clearAuthData();
+    await storageService.clearAllUserData();
     set({
       isAuthenticated: false,
       username: null,
       userPostcode: null,
+      userAddress: null,
       postcodeData: null,
+      housePlans: [],
+      selectedHousePlan: null,
+      wifiHeatmap: null,
+      userSettings: { hasCompletedOnboarding: false },
+      networkSummary: {},
+      devices: [],
+      // We keep agents and chat messages for now as they might be considered "app state" rather than "user state" in this context,
+      // or we could clear them too if desired.
+      routerNumber: null,
     });
   },
 
@@ -265,6 +278,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   loadDevices: async () => {
     const devices = await storageService.getDevices();
     set({ devices });
+  },
+
+  setRouterNumber: async (routerNumber: string) => {
+    // Optionally save to storage if needed
+    set({ routerNumber });
   },
 }));
 

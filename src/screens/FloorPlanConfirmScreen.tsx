@@ -73,7 +73,7 @@ export const FloorPlanConfirmScreen: React.FC = () => {
   };
 
   const handleReject = () => {
-    navigation.replace('FloorPlanManualInput', {});
+    navigation.replace('FloorPlanManualInput', { address: plan.addressLabel });
   };
 
   return (

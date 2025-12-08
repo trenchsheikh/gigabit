@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -87,7 +87,7 @@ export const PlansScreen: React.FC = () => {
               }
             >
               <View style={styles.cardHeader}>
-                <View>
+                <View style={styles.planInfoContainer}>
                   <Text style={styles.planAddress}>{plan.addressLabel}</Text>
                   <Text style={styles.planInfo}>
                     {plan.floors} floor{plan.floors !== 1 ? 's' : ''} • {plan.rooms.length} rooms
@@ -179,6 +179,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+  },
+  planInfoContainer: {
+    flex: 1,
+    marginRight: 12,
   },
   cardActions: {
     flexDirection: 'row',

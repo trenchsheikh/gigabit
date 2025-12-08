@@ -1,6 +1,22 @@
 import { HousePlan } from '../types';
 
 // Mock data for demonstration
+const RESTRICTED_ADDRESSES = [
+  { address: '14 Hunters Place, Hindhead, Surrey, GU26 6UY', serial: 'CXNK00EB4D45' },
+  { address: '15 Glenville Gardens, Grayshott, Hampshire, GU26 6SX', serial: 'CXNK00EB4C99' },
+  { address: 'Holmwood Glen Road, Grayshott, Hampshire, GU26 6NF', serial: 'CXNK00EB56EB' },
+  { address: 'Spurfold House Church Lane, Grayshott, Hampshire, GU26 6LY', serial: 'CXNK00EB5893' },
+  { address: 'Heatherlands Headley Road, Grayshott, Hampshire, GU26 6TN', serial: 'CXNK00EB58CE' },
+  { address: 'Rozel House Crossways Road, Grayshott, Hampshire, GU26 6HE', serial: 'CXNK00EB58D0' },
+  { address: 'Seton Lodge Tarn Road, Grayshott, Hampshire, GU26 6TP', serial: 'CXNK00EB56B5' },
+  { address: 'Daleside, Woodcock Bottom, Grayshott, Hampshire, GU26 6NA', serial: 'CXNK00EB4CB8' },
+  { address: 'Casals Glen Road, Grayshott, Hampshire, GU26 6NB', serial: 'CXNK00EB58D5' },
+  { address: 'The Haven Boundary Road, Grayshott, Hampshire, GU26 6TX', serial: 'CXNK00EB593B' },
+  { address: 'Annexe Crossways West Portsmouth road, Hindhead, Surrey, GU26 6BY', serial: 'CXNK00EB5919' },
+  { address: '49 Kingswood Firs, Grayshott, Hampshire, GU26 6ES', serial: 'CXNK00EB4C13' },
+  { address: '52 Kingswood Firs, Grayshott, Hampshire, GU26 6ER', serial: 'CXNK00EB594C' },
+];
+
 const MOCK_PLAN: HousePlan = {
   applicationId: 'PLAN-2024-001',
   addressLabel: '123 High Street, London',
@@ -18,9 +34,9 @@ const MOCK_PLAN: HousePlan = {
 import { Platform } from 'react-native';
 
 const API_URL = Platform.select({
-  android: 'http://10.0.2.2:3001',
-  ios: 'http://172.20.10.10:3001', // Host IP from error log
-  default: 'http://172.20.10.10:3001',
+  android: 'http://10.0.2.2:4000',
+  ios: 'http://192.168.1.175:4000', // Updated host IP
+  default: 'http://192.168.1.175:4000',
 });
 
 export const floorPlanService = {
@@ -28,46 +44,33 @@ export const floorPlanService = {
    * Simulates searching for a floor plan by postcode.
    * In a real app, this would call a backend API or scraper.
    */
-  searchFloorPlan: async (postcode: string): Promise<HousePlan | null> => {
+  searchFloorPlan: async (address: string): Promise<HousePlan | null> => {
     try {
-      // For now, we'll assume the user enters "Postcode, HouseNumber Street" or similar
-      // In a real app, we'd parse this better or have separate fields
-      const parts = postcode.split(',');
-      const actualPostcode = parts[parts.length - 1]?.trim() || postcode;
-      const addressPart = parts[0]?.trim() || '';
+      // Find the address in our restricted list
+      const matchedAddress = RESTRICTED_ADDRESSES.find(
+        (item) => item.address.toLowerCase() === address.toLowerCase()
+      );
 
-      // Simple parsing to extract house number and street
-      // This is brittle and should be improved with a proper address picker
-      const numberMatch = addressPart.match(/^(\d+)/);
-      const houseNumber = numberMatch ? numberMatch[1] : '1'; // Default to 1 if not found
-      const street = addressPart.replace(/^(\d+)/, '').trim() || 'High Street';
-
-      const response = await fetch(`${API_URL}/api/floorplan`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          postcode: actualPostcode,
-          houseNumber,
-          street,
-        }),
-      });
-
-      if (!response.ok) {
-        return null;
+      if (matchedAddress) {
+        return {
+          applicationId: `PLAN-${Date.now()}`,
+          addressLabel: matchedAddress.address,
+          createdAt: new Date().toISOString(),
+          floorplanUrl: undefined, // No specific floorplan URL for now, or we could add one if provided
+          rooms: [], 
+          floors: 1,
+          calixRouterSerialNumber: matchedAddress.serial,
+        };
       }
 
-      const data = await response.json() as any;
+      // Fallback to API if not in list (or we could return null if strict)
+      // For now, let's keep the API call but only if it's not in the list?
+      // The user said "limit it to all these addresses", so maybe we should ONLY return if in list.
+      // But let's keep the API call as a fallback for now just in case, or maybe return null.
+      // Given "limit it to all these addresses", I will return null if not found in list.
+      
+      return null;
 
-      return {
-        applicationId: `PLAN-${Date.now()}`,
-        addressLabel: data.listingAddress || `${houseNumber} ${street}, ${actualPostcode}`,
-        createdAt: new Date().toISOString(),
-        floorplanUrl: data.floorplanUrl,
-        rooms: [], // We'd need to parse the image or have the user add them
-        floors: 1, // Default
-      };
     } catch (error) {
       console.error('Error fetching floorplan:', error);
       return null;
@@ -76,10 +79,14 @@ export const floorPlanService = {
 
   async searchAddress(query: string): Promise<string[]> {
     try {
-      const response = await fetch(`${API_URL}/api/address-search?query=${encodeURIComponent(query)}`);
-      if (!response.ok) return [];
-      const data = await response.json() as string[];
-      return data;
+      if (!query) return [];
+      
+      const lowerQuery = query.toLowerCase();
+      const matches = RESTRICTED_ADDRESSES
+        .filter(item => item.address.toLowerCase().includes(lowerQuery))
+        .map(item => item.address);
+        
+      return matches;
     } catch (error) {
       console.error('Error searching address:', error);
       return [];

@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
+    View,
+    Text,
+    StyleSheet,
+    FlatList,
+    TouchableOpacity,
+    Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Card } from '../components/Card';
@@ -29,7 +29,11 @@ export const HousePlansScreen: React.FC = () => {
 
   const handleSelectPlan = (plan: HousePlan) => {
     selectHousePlan(plan);
-    navigation.navigate('HousePlanDetail', { planId: plan.applicationId });
+    if (plan.applicationId.startsWith('VISUAL-')) {
+        navigation.navigate('FloorPlanCreator', { initialPlan: plan });
+    } else {
+        navigation.navigate('HousePlanDetail', { planId: plan.applicationId });
+    }
   };
 
   const handleDeletePlan = (plan: HousePlan) => {
@@ -48,29 +52,42 @@ export const HousePlansScreen: React.FC = () => {
   };
 
   const renderPlanItem = ({ item }: { item: HousePlan }) => (
-    <TouchableOpacity onPress={() => handleSelectPlan(item)}>
-      <Card style={styles.planCard}>
+    <Card style={styles.planCard}>
+      <TouchableOpacity 
+        style={styles.planHeaderContainer} 
+        onPress={() => handleSelectPlan(item)}
+        activeOpacity={0.7}
+      >
         <View style={styles.planHeader}>
-          <View style={styles.iconContainer}>
-            <Text style={styles.planIcon}>🏠</Text>
-          </View>
           <View style={styles.planInfo}>
-            <Text style={styles.planAddress} numberOfLines={1}>
+            <Text style={styles.planAddress}>
               {item.addressLabel || 'My Home'}
             </Text>
             <Text style={styles.planDetails}>
               {item.floors} Floors • {item.rooms.length} Rooms
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => handleDeletePlan(item)}
-          >
-            <Ionicons name="trash-outline" size={20} color={colors.error} />
-          </TouchableOpacity>
+          <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
         </View>
-      </Card>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      
+      <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('FloorPlanCreator', { initialPlan: item })}
+            >
+              <Ionicons name="create-outline" size={20} color={colors.accentBlue} />
+              <Text style={styles.actionButtonText}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.deleteActionButton]}
+              onPress={() => handleDeletePlan(item)}
+            >
+              <Ionicons name="trash-outline" size={20} color={colors.error} />
+              <Text style={[styles.actionButtonText, styles.deleteButtonText]}>Delete</Text>
+            </TouchableOpacity>
+      </View>
+    </Card>
   );
 
   return (
@@ -91,10 +108,10 @@ export const HousePlansScreen: React.FC = () => {
           <Text style={styles.emptyIcon}>📝</Text>
           <Text style={styles.emptyTitle}>No Floor Plans Yet</Text>
           <Text style={styles.emptyDescription}>
-            Add a floor plan to start optimizing your WiFi network.
+            Create a floor plan to visualize your home.
           </Text>
           <Button
-            title="Add Your First Plan"
+            title="Create New Plan"
             onPress={handleAddPlan}
             variant="primary"
             style={styles.emptyButton}
@@ -142,37 +159,57 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 16,
   },
+  planHeaderContainer: {
+    marginBottom: 12,
+  },
   planHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.backgroundSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  planIcon: {
-    fontSize: 24,
+    justifyContent: 'space-between', // Ensure chevron is pushed to right
   },
   planInfo: {
     flex: 1,
   },
   planAddress: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     color: colors.textPrimary,
     marginBottom: 4,
   },
   planDetails: {
-    fontSize: 14,
+    fontSize: 15,
     color: colors.textSecondary,
   },
-  deleteButton: {
-    padding: 8,
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 12,
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#F5F7FA',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  deleteActionButton: {
+    backgroundColor: '#FFF5F5',
+    borderColor: '#FFEBEE',
+  },
+  actionButtonText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.accentBlue,
+  },
+  deleteButtonText: {
+    color: colors.error,
   },
   emptyState: {
     flex: 1,

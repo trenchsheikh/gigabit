@@ -188,6 +188,26 @@ export const storageService = {
     const filtered = devices.filter((d) => d.id !== deviceId);
     await AsyncStorage.setItem(STORAGE_KEYS.DEVICES, JSON.stringify(filtered));
   },
+
+  async clearAllUserData(): Promise<void> {
+    try {
+      const keys = [
+        STORAGE_KEYS.HOUSE_PLANS,
+        STORAGE_KEYS.WIFI_HEATMAP,
+        STORAGE_KEYS.USER_SETTINGS,
+        STORAGE_KEYS.AUTH_DATA,
+        STORAGE_KEYS.POSTCODE_DATA,
+        STORAGE_KEYS.DEVICES,
+        // We might want to keep agents if they are system defaults, but for now let's clear custom ones too?
+        // If we clear agents, we should probably re-init defaults on next load.
+        // Let's keep agents for now as they might be "system" level in this mock.
+        // STORAGE_KEYS.AGENTS, 
+      ];
+      await AsyncStorage.multiRemove(keys);
+    } catch (error) {
+      console.error('Error clearing user data:', error);
+    }
+  },
 };
 
 

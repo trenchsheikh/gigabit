@@ -40,7 +40,8 @@ async function fetchHtml(url: string): Promise<string> {
 // 2. Search Listings
 export async function searchListings(postcode: string): Promise<Array<ListingSummary>> {
     // Rightmove search URL pattern
-    const searchUrl = `${BASE_URL}/property-for-sale/search.html?searchLocation=${encodeURIComponent(postcode)}&useLocationIdentifier=false&locationIdentifier=&buy=For+sale`;
+    // Rightmove search URL pattern - Refined for exact postcode area
+    const searchUrl = `${BASE_URL}/property-for-sale/search.html?searchLocation=${encodeURIComponent(postcode)}&useLocationIdentifier=false&locationIdentifier=&buy=For+sale&radius=0.0&_includeSSTC=on`;
 
     console.log(`Searching listings at: ${searchUrl}`);
     const html = await fetchHtml(searchUrl);
