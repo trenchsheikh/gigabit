@@ -23,6 +23,8 @@ interface DeviceIdentificationModalProps {
   selectedHousePlan?: { rooms: Array<{ id: string; name: string }> } | null;
 }
 
+import { fetchDevices, DeviceSummary } from '../services/api/devices';
+
 const DEVICE_TYPES: { value: DeviceType; label: string; icon: string }[] = [
   { value: 'router', label: 'Router', icon: 'router' },
   { value: 'extender', label: 'WiFi Extender', icon: 'radio' },
@@ -34,30 +36,7 @@ const DEVICE_TYPES: { value: DeviceType; label: string; icon: string }[] = [
   { value: 'gaming-console', label: 'Gaming Console', icon: 'game-controller' },
   { value: 'iot-device', label: 'IoT Device', icon: 'hardware-chip' },
   { value: 'other', label: 'Other', icon: 'ellipsis-horizontal' },
-  { value: 'other', label: 'Other', icon: 'ellipsis-horizontal' },
 ];
-
-// Use the machine's IP address if testing on a physical device.
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://192.168.1.175:4000'; 
-const DEVICES_URL = `${API_BASE_URL}/api/devices`;
-
-// Define DeviceSummary locally to avoid import issues if not exported
-interface DeviceSummary {
-  id: string;
-  name: string;
-  connectionType: string;
-  rssi?: number;
-  wifiScore?: number | null;
-  dsPhyRateMbps?: number | null;
-  usPhyRateMbps?: number | null;
-  online: boolean;
-  signalQuality?: {
-    label: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Unknown';
-    level: 'excellent' | 'good' | 'fair' | 'poor' | 'unknown';
-  };
-  model?: string;
-  manufacturer?: string;
-}
 
 export const DeviceIdentificationModal: React.FC<DeviceIdentificationModalProps> = ({
   visible,
@@ -95,20 +74,7 @@ export const DeviceIdentificationModal: React.FC<DeviceIdentificationModalProps>
     try {
       setLoadingRouterDevices(true);
       
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
-
-      const url = routerNumber 
-        ? `${DEVICES_URL}?routerNumber=${routerNumber}`
-        : DEVICES_URL;
-
-      const response = await fetch(url, { signal: controller.signal as any });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch devices');
-      }
-      const data = await response.json() as DeviceSummary[];
+      const data = await fetchDevices(routerNumber || undefined);
       setRouterDevices(data);
     } catch (err) {
       console.error('Fetch error:', err);

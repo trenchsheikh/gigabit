@@ -12,28 +12,7 @@ import { colors } from '../theme/colors';
 import { useAppStore } from '../store/useAppStore';
 
 // Define types locally or import if shared
-export interface DeviceSummary {
-  id: string;
-  name: string;
-  connectionType: string;
-  rssi?: number;
-  wifiScore?: number | null;
-  dsPhyRateMbps?: number | null;
-  usPhyRateMbps?: number | null;
-  online: boolean;
-  signalQuality?: {
-    label: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Unknown';
-    level: 'excellent' | 'good' | 'fair' | 'poor' | 'unknown';
-  };
-  model?: string;
-  manufacturer?: string;
-}
-
-// Use the machine's IP address if testing on a physical device.
-// On Android Emulator, 10.0.2.2 points to the host's localhost.
-// On iOS Simulator, localhost works.
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://192.168.1.175:4000'; 
-const DEVICES_URL = `${API_BASE_URL}/api/devices`;
+import { fetchDevices, DeviceSummary } from '../services/api/devices';
 
 export const MyDevices: React.FC = () => {
   const { routerNumber } = useAppStore();
@@ -41,7 +20,7 @@ export const MyDevices: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDevices = async () => {
+  const loadDevices = async () => {
     if (!routerNumber) {
       setLoading(false);
       return;
@@ -51,19 +30,7 @@ export const MyDevices: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      // Add 120s timeout to prevent hanging (server can be slow due to sequential fetching)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
-
-      const url = `${DEVICES_URL}?routerNumber=${routerNumber}`;
-
-      const response = await fetch(url, { signal: controller.signal as any });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch devices');
-      }
-      const data = await response.json() as DeviceSummary[];
+      const data = await fetchDevices(routerNumber);
       setDevices(data);
     } catch (err) {
       setError('Failed to load devices');
@@ -74,7 +41,7 @@ export const MyDevices: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchDevices();
+    loadDevices();
   }, [routerNumber]);
 
   const getQualityColor = (level?: string) => {
@@ -148,7 +115,7 @@ export const MyDevices: React.FC = () => {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity onPress={fetchDevices} style={styles.retryButton}>
+        <TouchableOpacity onPress={loadDevices} style={styles.retryButton}>
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -159,7 +126,7 @@ export const MyDevices: React.FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My Devices</Text>
-        <TouchableOpacity onPress={fetchDevices}>
+        <TouchableOpacity onPress={loadDevices}>
             <Ionicons name="refresh" size={20} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>

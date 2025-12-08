@@ -31,13 +31,7 @@ const MOCK_PLAN: HousePlan = {
   createdAt: new Date().toISOString(),
 };
 
-import { Platform } from 'react-native';
-
-const API_URL = Platform.select({
-  android: 'http://10.0.2.2:4000',
-  ios: 'http://192.168.1.175:4000', // Updated host IP
-  default: 'http://192.168.1.175:4000',
-});
+import { getFloorplanForAddress } from './api/floorplan';
 
 export const floorPlanService = {
   /**
@@ -63,11 +57,37 @@ export const floorPlanService = {
         };
       }
 
-      // Fallback to API if not in list (or we could return null if strict)
-      // For now, let's keep the API call but only if it's not in the list?
-      // The user said "limit it to all these addresses", so maybe we should ONLY return if in list.
-      // But let's keep the API call as a fallback for now just in case, or maybe return null.
-      // Given "limit it to all these addresses", I will return null if not found in list.
+      // Fallback to Scraper (Ported from Server)
+      // Parse address: "14 Hunters Place, Hindhead, Surrey, GU26 6UY"
+      const parts = address.split(',').map(p => p.trim());
+      if (parts.length >= 2) {
+          const postcode = parts[parts.length - 1];
+          const firstPart = parts[0]; // "14 Hunters Place"
+          
+          // Try to split number and street
+          const numberMatch = firstPart.match(/^(\d+)\s+(.*)$/);
+          let houseNumber = '';
+          let street = firstPart;
+          
+          if (numberMatch) {
+              houseNumber = numberMatch[1];
+              street = numberMatch[2];
+          }
+
+          console.log(`Scraping floorplan for: ${houseNumber} ${street}, ${postcode}`);
+          const result = await getFloorplanForAddress(postcode, houseNumber, street);
+          
+          if (result && result.floorplanUrl) {
+              return {
+                  applicationId: `PLAN-${Date.now()}`,
+                  addressLabel: result.listingAddress || address,
+                  createdAt: new Date().toISOString(),
+                  floorplanUrl: result.floorplanUrl,
+                  rooms: [],
+                  floors: 1,
+              };
+          }
+      }
       
       return null;
 

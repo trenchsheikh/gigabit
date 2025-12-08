@@ -57,7 +57,7 @@ module.exports = {
     ],
     extra: {
       eas: {
-        projectId: 'a54634e2-02df-4105-807b-265677fe5bde',
+        projectId: '34b11282-4832-47e4-8ee9-dbf321de7264',
       },
       OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
       ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY || '',
