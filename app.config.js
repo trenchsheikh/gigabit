@@ -5,7 +5,7 @@ require('dotenv').config();
 module.exports = {
   expo: {
     name: 'GigaBit WiFi AI',
-    slug: 'gigabit-wifi-ai',
+    slug: 'gigbait',
     version: '1.0.0',
     orientation: 'portrait',
     // icon: './assets/icon.png', // Uncomment when you add the icon file
@@ -23,6 +23,9 @@ module.exports = {
         NSAppTransportSecurity: {
           NSAllowsArbitraryLoads: true,
         },
+        NSPhotoLibraryUsageDescription: 'Allow GigaBit to access your photo library to save and share WiFi heatmap images.',
+        NSCameraUsageDescription: 'Allow GigaBit to access your camera to scan WiFi signals and create AR heatmaps.',
+        NSMicrophoneUsageDescription: 'Allow GigaBit to access your microphone to speak with AI assistants.',
       },
     },
     android: {
